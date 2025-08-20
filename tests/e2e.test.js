@@ -4,7 +4,7 @@ import { promisify } from 'util';
 
 const sleep = promisify(setTimeout);
 
-class PlanningPokerTester {
+class PlanningClubsTester {
   constructor() {
     this.browser = null;
     this.devServer = null;
@@ -262,7 +262,7 @@ class PlanningPokerTester {
   }
 
   async runAllTests() {
-    console.log('🧪 Starting Planning Poker E2E Tests\n');
+    console.log('🧪 Starting Planning Club E2E Tests\n');
     
     try {
       await this.setup();
@@ -290,7 +290,7 @@ class PlanningPokerTester {
 
 // Run tests if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const tester = new PlanningPokerTester();
+  const tester = new PlanningClubsTester();
   
   process.on('SIGINT', async () => {
     console.log('\n🛑 Interrupting tests...');
@@ -309,4 +309,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 }
 
-export default PlanningPokerTester;
+export default PlanningClubsTester;

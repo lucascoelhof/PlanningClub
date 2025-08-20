@@ -1,6 +1,6 @@
-# Planning Poker
+# Planning Club
 
-A serverless, peer-to-peer planning poker web application for agile teams. No server required - all communication happens directly between users through WebRTC.
+A serverless, peer-to-peer planning estimation web application for agile teams. No server required - all communication happens directly between users through WebRTC.
 
 ## Features
 
@@ -53,7 +53,7 @@ src/
 1. **Clone and install**:
    ```bash
    git clone <your-repo>
-   cd planning-poker
+   cd planning-clubs
    npm install
    ```
 
@@ -72,7 +72,7 @@ src/
 ### GitHub Pages (Automatic)
 1. Push to `main` branch
 2. GitHub Actions will automatically build and deploy
-3. Access at `https://yourusername.github.io/planning-poker`
+3. Access at `https://yourusername.github.io/planning-clubs`
 
 ### Manual Deployment
 1. Run `npm run build`

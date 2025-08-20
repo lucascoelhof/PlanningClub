@@ -1,7 +1,7 @@
 import './style.css'
-import { PlanningPokerApp } from './app.js'
+import { PlanningClubsApp } from './app.js'
 
-const app = new PlanningPokerApp()
+const app = new PlanningClubsApp()
 app.init()
 
 // Make app available globally for testing
