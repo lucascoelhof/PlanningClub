@@ -99,10 +99,9 @@ body {
 }
 
 .game-page {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .game-header {
@@ -129,10 +128,6 @@ body {
   border: 1px solid #e2e8f0;
 }
 
-.game-actions {
-  display: flex;
-  gap: 1rem;
-}
 
 .btn-secondary {
   background: #e2e8f0;
@@ -146,15 +141,13 @@ body {
 
 .game-content {
   flex: 1;
-  padding: 2rem;
+  padding: 2rem 2rem 1rem 2rem;
   display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+  justify-content: center;
   overflow: visible;
 }
 
 .players-section {
-  flex: 1;
   background: white;
   border-radius: 12px;
   padding: 2rem;
@@ -164,6 +157,8 @@ body {
   min-width: 0;
   max-height: 600px;
   height: fit-content;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .players-section h3 {
@@ -248,32 +243,36 @@ body {
 }
 
 .voting-section {
-  width: 320px;
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  height: fit-content;
-  max-height: 100%;
-  overflow: visible;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0 2rem 2rem 2rem;
+  flex-wrap: wrap;
 }
 
-.voting-section h3 {
+.voting-cards-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+}
+
+.voting-cards-container h3 {
   margin-bottom: 1rem;
-  flex-shrink: 0;
   font-size: 1.1rem;
   color: #4a5568;
+  text-align: center;
 }
 
 .voting-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
-  margin-bottom: 1.25rem;
-  flex-shrink: 0;
+  max-width: 300px;
 }
 
 .vote-card {
@@ -304,13 +303,17 @@ body {
 }
 
 .reactions-section {
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: 250px;
 }
 
 .reactions-section h3 {
   margin-bottom: 0.75rem;
   font-size: 1.1rem;
   color: #4a5568;
+  text-align: center;
 }
 
 .reaction-buttons {
@@ -344,24 +347,41 @@ body {
 }
 
 .voting-stats {
-  margin: 1rem 0 1.25rem 0;
-  padding: 0.75rem;
-  background: #f7fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  flex-shrink: 0;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  min-width: 200px;
+  max-width: 280px;
 }
 
 .voting-stats h3 {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
   color: #4a5568;
+  text-align: center;
+}
+
+.stats-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.btn-small {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
 }
 
 .stats-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
 }
 
 .average-section {
@@ -444,26 +464,24 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .game-content {
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  
-  .players-section {
-    flex: none;
-    height: auto;
-    max-height: 50vh;
-  }
-  
-  .players-grid {
-    max-height: none;
-    overflow-y: visible;
-  }
-  
   .voting-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .voting-cards-container,
+  .voting-stats,
+  .reactions-section {
+    min-width: auto;
+    max-width: none;
     width: 100%;
-    max-height: none;
-    overflow-y: visible;
+    max-width: 400px;
+  }
+  
+  .voting-cards {
+    max-width: none;
+    width: 100%;
   }
 }
 
@@ -487,12 +505,19 @@ body {
     padding: 1rem;
   }
   
+  .voting-section {
+    margin: 0 1rem 1rem 1rem;
+    padding: 1rem;
+  }
+  
   .players-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
   
   .voting-cards {
     grid-template-columns: repeat(4, 1fr);
+    max-width: none;
+    width: 100%;
   }
   
   .vote-card {

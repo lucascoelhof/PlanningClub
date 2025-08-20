@@ -93,10 +93,6 @@ export class UIManager {
             <h2>Planning Poker</h2>
             <div class="session-id">Session: ${sessionId}</div>
           </div>
-          <div class="game-actions">
-            <button id="clear-votes" class="btn btn-secondary">Clear Votes</button>
-            <button id="show-votes" class="btn btn-secondary">Show Votes</button>
-          </div>
         </div>
         
         <div class="game-content">
@@ -106,37 +102,43 @@ export class UIManager {
               <!-- Players will be rendered here -->
             </div>
           </div>
-          
-          <div class="voting-section">
+        </div>
+        
+        <div class="voting-section">
+          <div class="voting-cards-container">
             <h3>Cast Your Vote</h3>
             <div id="voting-cards" class="voting-cards">
               <!-- Vote cards will be rendered here -->
             </div>
-            
-            <div id="voting-stats" class="voting-stats hidden">
-              <h3>Voting Statistics</h3>
-              <div class="stats-content">
-                <div class="average-section">
-                  <strong>Average:</strong>
-                  <div class="average-value" id="average-value">-</div>
+          </div>
+          
+          <div id="voting-stats" class="voting-stats">
+            <h3>Voting Statistics</h3>
+            <div class="stats-actions">
+              <button id="clear-votes" class="btn btn-secondary btn-small">Clear Votes</button>
+              <button id="show-votes" class="btn btn-secondary btn-small">Show Votes</button>
+            </div>
+            <div class="stats-content">
+              <div class="average-section">
+                <strong>Average:</strong>
+                <div class="average-value" id="average-value">-</div>
+              </div>
+              <div class="votes-breakdown">
+                <div class="breakdown-header">
+                  <span><strong>Points</strong></span>
+                  <span><strong>Votes</strong></span>
                 </div>
-                <div class="votes-breakdown">
-                  <div class="breakdown-header">
-                    <span><strong>Points</strong></span>
-                    <span><strong>Votes</strong></span>
-                  </div>
-                  <div id="votes-breakdown-content">
-                    <!-- Vote breakdown will be rendered here -->
-                  </div>
+                <div id="votes-breakdown-content">
+                  <!-- Vote breakdown will be rendered here -->
                 </div>
               </div>
             </div>
-            
-            <div class="reactions-section">
-              <h3>Reactions</h3>
-              <div id="reaction-buttons" class="reaction-buttons">
-                <!-- Reaction buttons will be rendered here -->
-              </div>
+          </div>
+          
+          <div class="reactions-section">
+            <h3>Reactions</h3>
+            <div id="reaction-buttons" class="reaction-buttons">
+              <!-- Reaction buttons will be rendered here -->
             </div>
           </div>
         </div>
@@ -180,21 +182,34 @@ export class UIManager {
   }
 
   bindGamePageEvents() {
+    this.renderVoteCards()
+    this.renderReactionButtons()
+    this.bindVotingStatsEvents()
+    
+    // Initially hide the stats content
+    const statsContent = document.querySelector('.stats-content')
+    if (statsContent) {
+      statsContent.style.display = 'none'
+    }
+  }
+
+  bindVotingStatsEvents() {
     const clearBtn = document.getElementById('clear-votes')
     const showBtn = document.getElementById('show-votes')
 
-    clearBtn.addEventListener('click', () => {
-      this.hideVotingStats()
-      this.votesRevealed = false
-      this.emit('clearVotes')
-    })
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        this.hideVotingStats()
+        this.votesRevealed = false
+        this.emit('clearVotes')
+      })
+    }
 
-    showBtn.addEventListener('click', () => {
-      this.emit('showVotes')
-    })
-
-    this.renderVoteCards()
-    this.renderReactionButtons()
+    if (showBtn) {
+      showBtn.addEventListener('click', () => {
+        this.emit('showVotes')
+      })
+    }
   }
 
   renderVoteCards() {
@@ -476,19 +491,23 @@ export class UIManager {
   showVotingStats() {
     if (this.currentPage !== 'game') return
 
-    const statsContainer = document.getElementById('voting-stats')
     const averageEl = document.getElementById('average-value')
     const breakdownEl = document.getElementById('votes-breakdown-content')
+    const statsContent = document.querySelector('.stats-content')
     
-    if (!statsContainer || !averageEl || !breakdownEl) return
+    if (!averageEl || !breakdownEl || !statsContent) return
 
     // Calculate statistics from current players
     const votingSummary = this.calculateVotingSummary()
     
     if (votingSummary.total === 0) {
-      this.hideVotingStats()
+      // Hide just the content, not the whole section
+      statsContent.style.display = 'none'
       return
     }
+
+    // Show the content
+    statsContent.style.display = 'flex'
 
     // Show average
     if (votingSummary.average !== null) {
@@ -515,15 +534,12 @@ export class UIManager {
         <span class="vote-count">${count}</span>
       </div>
     `).join('')
-
-    // Show the stats container
-    statsContainer.classList.remove('hidden')
   }
 
   hideVotingStats() {
-    const statsContainer = document.getElementById('voting-stats')
-    if (statsContainer) {
-      statsContainer.classList.add('hidden')
+    const statsContent = document.querySelector('.stats-content')
+    if (statsContent) {
+      statsContent.style.display = 'none'
     }
   }
 
