@@ -1,0 +1,22 @@
+{
+  "name": "planning-poker",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:e2e": "node tests/e2e.test.js"
+  },
+  "devDependencies": {
+    "jest": "^30.0.5",
+    "puppeteer": "^24.16.2",
+    "vite": "^7.1.2"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "peerjs": "^1.5.5"
+  }
+}

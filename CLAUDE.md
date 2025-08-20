@@ -1,0 +1,1 @@
+- Ask questions whenever you are uncertain in the requirements.
