@@ -42,7 +42,7 @@ export class UIManager {
   getHomePageHTML() {
     return `
       <div class="home-page">
-        <h1>Planning Poker</h1>
+        <h1>♣ Planning Poker</h1>
         <div class="home-actions">
           <div class="card">
             <h2>Create Session</h2>
@@ -90,7 +90,7 @@ export class UIManager {
       <div class="game-page">
         <div class="game-header">
           <div class="session-info">
-            <h2>Planning Poker</h2>
+            <h2>♣ Planning Poker</h2>
             <div class="session-id">Session: ${sessionId}</div>
           </div>
         </div>
