@@ -3,7 +3,7 @@ import { PeerManager } from './peer-manager.js'
 import { GameManager } from './game-manager.js'
 import { UIManager } from './ui-manager.js'
 
-export class PlanningClubsApp {
+export class PlanningClubApp {
   constructor() {
     this.router = new Router()
     this.peerManager = new PeerManager()
