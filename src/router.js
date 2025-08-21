@@ -15,6 +15,9 @@ export class Router {
     if (path === '/' || path === '/index.html') {
       this.emit('route:home')
       this.currentRoute = 'home'
+    } else if (path === '/about') {
+      this.emit('route:about')
+      this.currentRoute = 'about'
     } else {
       // Check if it's a session route (9-digit number)
       const sessionMatch = path.match(/^\/(\d{9})$/)

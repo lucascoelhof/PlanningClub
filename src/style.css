@@ -21,10 +21,16 @@ body {
 .home-page {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
   text-align: center;
+}
+
+.home-page > .home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
 }
 
 .home-page h1 {
@@ -292,13 +298,18 @@ body {
   flex-wrap: wrap;
 }
 
-.voting-cards-container {
+.voting-cards-section {
   display: flex;
   flex-direction: column;
   min-width: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
 }
 
-.voting-cards-container h3 {
+.voting-cards-section h3 {
   margin-bottom: 1rem;
   font-size: 1.1rem;
   color: #e2e8f0;
@@ -348,6 +359,12 @@ body {
   flex-direction: column;
   min-width: 200px;
   max-width: 250px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
 }
 
 .reactions-section h3 {
@@ -391,7 +408,9 @@ body {
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-.voting-stats {
+.voting-stats-section {
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
@@ -402,7 +421,7 @@ body {
   max-width: 280px;
 }
 
-.voting-stats h3 {
+.voting-stats-section h3 {
   margin-bottom: 0.75rem;
   font-size: 1.1rem;
   color: #e2e8f0;
@@ -521,8 +540,8 @@ body {
     gap: 1.5rem;
   }
   
-  .voting-cards-container,
-  .voting-stats,
+  .voting-cards-section,
+  .voting-stats-section,
   .reactions-section {
     min-width: auto;
     max-width: none;
@@ -574,5 +593,163 @@ body {
   .vote-card {
     aspect-ratio: 1;
     font-size: 1rem;
+  }
+}
+
+/* Footer Styles */
+.site-footer {
+  margin-top: auto;
+  padding: 2rem 0;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.footer-content a {
+  color: #60a5fa;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-content a:hover {
+  color: #93c5fd;
+}
+
+.footer-separator {
+  color: rgba(226, 232, 240, 0.5);
+}
+
+/* About Page Styles */
+.about-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.about-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.about-header h1 {
+  color: white;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.about-nav {
+  margin-top: 1rem;
+}
+
+.about-nav a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+
+.about-nav a:hover {
+  color: #93c5fd;
+}
+
+.about-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.terms-section,
+.tech-section {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+}
+
+.terms-section h2,
+.tech-section h2 {
+  color: white;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.terms-section h3,
+.tech-section h3 {
+  color: #60a5fa;
+  font-size: 1.2rem;
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.terms-section p,
+.tech-section p {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.tech-section ul {
+  margin: 1rem 0 1rem 1.5rem;
+}
+
+.tech-section li {
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.tech-section li strong {
+  color: #60a5fa;
+}
+
+.github-link {
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.github-link:hover {
+  color: #93c5fd;
+}
+
+/* Mobile responsiveness for about page */
+@media (max-width: 768px) {
+  .about-page {
+    padding: 1rem;
+  }
+  
+  .about-header h1 {
+    font-size: 2rem;
+  }
+  
+  .terms-section,
+  .tech-section {
+    padding: 1.5rem;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .footer-separator {
+    display: none;
   }
 }

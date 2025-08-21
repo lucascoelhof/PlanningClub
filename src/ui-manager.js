@@ -30,6 +30,13 @@ export class UIManager {
     this.bindGamePageEvents()
   }
 
+  showAboutPage() {
+    this.currentPage = 'about'
+    this.ensureAppContainer()
+    this.appContainer.innerHTML = this.getAboutPageHTML()
+    this.bindAboutPageEvents()
+  }
+
   ensureAppContainer() {
     if (!this.appContainer) {
       this.appContainer = document.getElementById('app')
@@ -42,45 +49,55 @@ export class UIManager {
   getHomePageHTML() {
     return `
       <div class="home-page">
-        <h1>♣ Planning Club ♣</h1>
-        <div class="home-actions">
-          <div class="card">
-            <h2>Create Session</h2>
-            <form id="create-form">
-              <div class="form-group">
-                <label for="create-identity">Your Name or Email</label>
-                <input type="text" id="create-identity" required maxlength="70" 
-                       placeholder="John Doe or john@example.com">
-                <small style="color: #666; font-size: 0.85em; margin-top: 0.25rem; display: block;">
-                  Enter your name or email address (for Gravatar)
-                </small>
-              </div>
-              <button type="submit" class="btn">Create Session</button>
-            </form>
+        <div class="home-content">
+          <h1>♣ Planning Club ♣</h1>
+          <div class="home-actions">
+            <div class="card">
+              <h2>Create Session</h2>
+              <form id="create-form">
+                <div class="form-group">
+                  <label for="create-identity">Your Name or Email</label>
+                  <input type="text" id="create-identity" required maxlength="70" 
+                         placeholder="John Doe or john@example.com">
+                  <small style="color: #666; font-size: 0.85em; margin-top: 0.25rem; display: block;">
+                    Enter your name or email address (for Gravatar)
+                  </small>
+                </div>
+                <button type="submit" class="btn">Create Session</button>
+              </form>
+            </div>
+            
+            <div class="card">
+              <h2>Join Session</h2>
+              <form id="join-form">
+                <div class="form-group">
+                  <label for="join-session">Session ID</label>
+                  <input type="text" id="join-session" required pattern="\\d{9}" maxlength="9" placeholder="123456789">
+                </div>
+                <div class="form-group">
+                  <label for="join-identity">Your Name or Email</label>
+                  <input type="text" id="join-identity" required maxlength="70" 
+                         placeholder="Jane Doe or jane@example.com">
+                  <small style="color: #666; font-size: 0.85em; margin-top: 0.25rem; display: block;">
+                    Enter your name or email address (for Gravatar)
+                  </small>
+                </div>
+                <button type="submit" class="btn">Join Session</button>
+              </form>
+            </div>
           </div>
           
-          <div class="card">
-            <h2>Join Session</h2>
-            <form id="join-form">
-              <div class="form-group">
-                <label for="join-session">Session ID</label>
-                <input type="text" id="join-session" required pattern="\\d{9}" maxlength="9" placeholder="123456789">
-              </div>
-              <div class="form-group">
-                <label for="join-identity">Your Name or Email</label>
-                <input type="text" id="join-identity" required maxlength="70" 
-                       placeholder="Jane Doe or jane@example.com">
-                <small style="color: #666; font-size: 0.85em; margin-top: 0.25rem; display: block;">
-                  Enter your name or email address (for Gravatar)
-                </small>
-              </div>
-              <button type="submit" class="btn">Join Session</button>
-            </form>
-          </div>
+          <div id="error-message" class="error hidden"></div>
+          <div id="loading-message" class="loading hidden">Connecting...</div>
         </div>
         
-        <div id="error-message" class="error hidden"></div>
-        <div id="loading-message" class="loading hidden">Connecting...</div>
+        <footer class="site-footer">
+          <div class="footer-content">
+            <span>Created by <a href="https://github.com/lucascoelhof" target="_blank" rel="noopener noreferrer">Lucas Coelho Figueiredo</a></span>
+            <span class="footer-separator">•</span>
+            <a href="/about" id="terms-link">Terms of Use</a>
+          </div>
+        </footer>
       </div>
     `
   }
@@ -105,20 +122,20 @@ export class UIManager {
         </div>
         
         <div class="voting-section">
-          <div class="voting-cards-container">
+          <div class="voting-cards-section">
             <h3>Cast Your Vote</h3>
             <div id="voting-cards" class="voting-cards">
               <!-- Vote cards will be rendered here -->
             </div>
           </div>
           
-          <div id="voting-stats" class="voting-stats">
+          <div class="voting-stats-section">
             <h3>Voting Statistics</h3>
             <div class="stats-actions">
               <button id="clear-votes" class="btn btn-secondary btn-small">Clear Votes</button>
               <button id="show-votes" class="btn btn-secondary btn-small">Show Votes</button>
             </div>
-            <div class="stats-content">
+            <div id="voting-stats" class="stats-content">
               <div class="average-section">
                 <strong>Average:</strong>
                 <div class="average-value" id="average-value">-</div>
@@ -142,6 +159,14 @@ export class UIManager {
             </div>
           </div>
         </div>
+        
+        <footer class="site-footer">
+          <div class="footer-content">
+            <span>Created by <a href="https://github.com/lucascoelhof" target="_blank" rel="noopener noreferrer">Lucas Coelho Figueiredo</a></span>
+            <span class="footer-separator">•</span>
+            <a href="/about" id="game-terms-link">Terms of Use</a>
+          </div>
+        </footer>
       </div>
     `
   }
@@ -179,6 +204,92 @@ export class UIManager {
         this.emit('joinSession', sessionId, playerData)
       }
     })
+    
+    // Bind footer link events
+    const termsLink = document.getElementById('terms-link')
+    if (termsLink) {
+      termsLink.addEventListener('click', (e) => {
+        e.preventDefault()
+        this.emit('navigate', '/about')
+      })
+    }
+  }
+
+  getAboutPageHTML() {
+    return `
+      <div class="about-page">
+        <div class="about-header">
+          <h1>♣ Planning Club ♣</h1>
+          <nav class="about-nav">
+            <a href="/" id="home-link">← Back to Home</a>
+          </nav>
+        </div>
+        
+        <div class="about-content">
+          <section class="terms-section">
+            <h2>Terms of Use</h2>
+            <div class="terms-content">
+              <p><strong>Last updated:</strong> ${new Date().toLocaleDateString()}</p>
+              
+              <h3>1. Acceptance of Terms</h3>
+              <p>By accessing and using Planning Club, you agree to be bound by these Terms of Use and all applicable laws and regulations.</p>
+              
+              <h3>2. Description of Service</h3>
+              <p>Planning Club is a web-based planning poker application that allows teams to estimate effort for tasks collaboratively. The service is provided "as is" without warranty of any kind.</p>
+              
+              <h3>3. Privacy and Data</h3>
+              <p>We collect minimal anonymous usage data to improve the service. No personal information is stored permanently. Session data is temporary and automatically deleted when sessions end.</p>
+              
+              <h3>4. User Conduct</h3>
+              <p>Users agree to use the service responsibly and not to engage in any activity that could harm the service or other users.</p>
+              
+              <h3>5. Limitation of Liability</h3>
+              <p>Planning Club is provided free of charge. We shall not be liable for any damages arising from the use or inability to use this service.</p>
+              
+              <h3>6. Changes to Terms</h3>
+              <p>We reserve the right to modify these terms at any time. Continued use of the service constitutes acceptance of modified terms.</p>
+            </div>
+          </section>
+          
+          <section class="tech-section">
+            <h2>This Website</h2>
+            <div class="tech-content">
+              <p>Planning Club is built using modern web technologies to provide a fast, reliable, and user-friendly experience.</p>
+              
+              <h3>Technologies Used:</h3>
+              <ul>
+                <li><strong>Frontend:</strong> Vanilla JavaScript, HTML5, CSS3</li>
+                <li><strong>Build Tool:</strong> Vite</li>
+                <li><strong>Peer-to-Peer:</strong> PeerJS for real-time communication</li>
+                <li><strong>Analytics:</strong> GoatCounter (privacy-focused)</li>
+                <li><strong>Hosting:</strong> GitHub Pages</li>
+                <li><strong>Avatars:</strong> Gravatar integration</li>
+              </ul>
+              
+              <h3>Open Source</h3>
+              <p>This project is open source and available on GitHub. Feel free to contribute, report issues, or fork the project for your own use.</p>
+              <p><a href="https://github.com/lucascoelhof/PlanningClub" target="_blank" rel="noopener noreferrer" class="github-link">View on GitHub →</a></p>
+            </div>
+          </section>
+        </div>
+        
+        <footer class="site-footer">
+          <div class="footer-content">
+            <span>Created by <a href="https://github.com/lucascoelhof" target="_blank" rel="noopener noreferrer">Lucas Coelho Figueiredo</a></span>
+          </div>
+        </footer>
+      </div>
+    `
+  }
+
+  bindAboutPageEvents() {
+    const homeLink = document.getElementById('home-link')
+    if (homeLink) {
+      homeLink.addEventListener('click', (e) => {
+        e.preventDefault()
+        this.emit('navigate', '/')
+      })
+    }
   }
 
   bindGamePageEvents() {
@@ -190,6 +301,15 @@ export class UIManager {
     const statsContent = document.querySelector('.stats-content')
     if (statsContent) {
       statsContent.style.display = 'none'
+    }
+    
+    // Bind footer link events
+    const gameTermsLink = document.getElementById('game-terms-link')
+    if (gameTermsLink) {
+      gameTermsLink.addEventListener('click', (e) => {
+        e.preventDefault()
+        this.emit('navigate', '/about')
+      })
     }
   }
 

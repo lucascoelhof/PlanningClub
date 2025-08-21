@@ -2,6 +2,7 @@ import { Router } from './router.js'
 import { PeerManager } from './peer-manager.js'
 import { GameManager } from './game-manager.js'
 import { UIManager } from './ui-manager.js'
+import { analytics } from './services/analytics.js'
 
 export class PlanningClubApp {
   constructor() {
@@ -41,6 +42,10 @@ export class PlanningClubApp {
         // We're already in this session, just show the game page
         this.uiManager.showGamePage(sessionId)
       }
+    })
+
+    this.router.on('route:about', () => {
+      this.uiManager.showAboutPage()
     })
 
     // Game events
@@ -84,18 +89,25 @@ export class PlanningClubApp {
 
     this.uiManager.on('vote', (vote) => {
       this.gameManager.castVote(vote)
+      analytics.trackVoteSubmitted()
     })
 
     this.uiManager.on('clearVotes', () => {
       this.gameManager.clearVotes()
+      analytics.trackVotingStarted()
     })
 
     this.uiManager.on('showVotes', () => {
       this.gameManager.showVotes()
+      analytics.trackVotesRevealed()
     })
 
     this.uiManager.on('reaction', (reaction) => {
       this.gameManager.setReaction(reaction)
+    })
+
+    this.uiManager.on('navigate', (path) => {
+      this.router.navigate(path)
     })
 
     // Game manager to peer manager bridge events
@@ -124,6 +136,10 @@ export class PlanningClubApp {
       this.router.navigate(`/${sessionId}`)
       this.uiManager.showGamePage(sessionId)
       this.gameManager.createSession(sessionId, playerData)
+      
+      // Track room creation
+      analytics.trackRoomCreated()
+      analytics.trackUserJoined(true) // true = host
     } catch (error) {
       this.uiManager.showError('Failed to create session: ' + error.message)
     }
@@ -143,6 +159,9 @@ export class PlanningClubApp {
       await this.peerManager.joinSession(sessionId)
       this.uiManager.showGamePage(sessionId)
       this.gameManager.joinSession(sessionId)
+      
+      // Track participant joining
+      analytics.trackUserJoined(false) // false = participant
     } catch (error) {
       this.uiManager.showError('Failed to join session: ' + error.message)
       this.router.navigate('/')
@@ -150,6 +169,11 @@ export class PlanningClubApp {
   }
 
   cleanup() {
+    // Track if user was in a room
+    if (this.gameManager.sessionId) {
+      analytics.trackRoomLeft()
+    }
+    
     // Disconnect from peers
     this.peerManager.disconnect()
     
