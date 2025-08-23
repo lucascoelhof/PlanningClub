@@ -33,14 +33,25 @@ export class PeerManager {
       })
 
       this.peer.on('connection', (conn) => {
-        console.log('Received connection request from:', conn.peer)
-        // Accept the connection
-        conn.on('open', () => {
-          console.log('Connection accepted and opened from:', conn.peer)
+        console.log('Received connection request from:', conn.peer, 'Open:', conn.open)
+        
+        // For incoming connections, set up handlers immediately
+        this.setupConnectionHandlers(conn)
+        
+        // If connection is already open, handle it
+        if (conn.open) {
+          console.log('Incoming connection already open')
           this.handleIncomingConnection(conn)
-        })
+        } else {
+          // Wait for connection to open
+          conn.on('open', () => {
+            console.log('Incoming connection opened from:', conn.peer)
+            this.handleIncomingConnection(conn)
+          })
+        }
+        
         conn.on('error', (error) => {
-          console.error('Error accepting connection from', conn.peer, ':', error)
+          console.error('Error with connection from', conn.peer, ':', error)
         })
       })
 
@@ -79,11 +90,18 @@ export class PeerManager {
         // Connect to host
         const hostConnection = this.peer.connect(`host-${sessionId}`)
         
-        hostConnection.on('open', () => {
-          console.log('Connected to host')
+        // Check if connection is already open
+        if (hostConnection.open) {
+          console.log('Connection to host already open')
           this.handleOutgoingConnection(hostConnection)
           resolve()
-        })
+        } else {
+          hostConnection.on('open', () => {
+            console.log('Connected to host')
+            this.handleOutgoingConnection(hostConnection)
+            resolve()
+          })
+        }
 
         hostConnection.on('error', (error) => {
           console.error('Connection to host failed:', error)
@@ -92,20 +110,32 @@ export class PeerManager {
 
         setTimeout(() => {
           if (!hostConnection.open) {
+            console.error('Connection timeout - host connection did not open')
             reject(new Error('Failed to connect to session'))
           }
         }, 10000)
       })
 
       this.peer.on('connection', (conn) => {
-        console.log('Received connection request from:', conn.peer)
-        // Accept the connection
-        conn.on('open', () => {
-          console.log('Connection accepted and opened from:', conn.peer)
+        console.log('Received connection request from:', conn.peer, 'Open:', conn.open)
+        
+        // For incoming connections, set up handlers immediately
+        this.setupConnectionHandlers(conn)
+        
+        // If connection is already open, handle it
+        if (conn.open) {
+          console.log('Incoming connection already open')
           this.handleIncomingConnection(conn)
-        })
+        } else {
+          // Wait for connection to open
+          conn.on('open', () => {
+            console.log('Incoming connection opened from:', conn.peer)
+            this.handleIncomingConnection(conn)
+          })
+        }
+        
         conn.on('error', (error) => {
-          console.error('Error accepting connection from', conn.peer, ':', error)
+          console.error('Error with connection from', conn.peer, ':', error)
         })
       })
 
@@ -116,26 +146,8 @@ export class PeerManager {
     })
   }
 
-  handleIncomingConnection(conn) {
-    console.log('Handling incoming connection from:', conn.peer)
-    
-    // Connection should already be open when this is called
-    this.connections.set(conn.peer, conn)
-    this.emit('peerConnected', conn.peer)
-    
-    // If we're the host, share the current connection list with new peer
-    if (this.isHost) {
-      this.broadcastConnectionList()
-      
-      // Help establish P2P connections between all peers
-      setTimeout(() => {
-        conn.send({
-          type: 'peer_list',
-          peers: Array.from(this.connections.keys()).filter(id => id !== conn.peer)
-        })
-      }, 100) // Small delay to ensure connection is stable
-    }
-
+  setupConnectionHandlers(conn) {
+    // Set up data, close, and error handlers immediately
     conn.on('data', (data) => {
       this.handlePeerData(conn.peer, data)
     })
@@ -153,37 +165,38 @@ export class PeerManager {
     })
   }
 
+  handleIncomingConnection(conn) {
+    console.log('Handling incoming connection from:', conn.peer)
+    
+    // Connection should already be open when this is called
+    this.connections.set(conn.peer, conn)
+    this.emit('peerConnected', conn.peer)
+    
+    // If we're the host, share the current connection list with new peer
+    if (this.isHost) {
+      this.broadcastConnectionList()
+      
+      // Help establish P2P connections between all peers
+      setTimeout(() => {
+        if (conn.open) {
+          conn.send({
+            type: 'peer_list',
+            peers: Array.from(this.connections.keys()).filter(id => id !== conn.peer)
+          })
+        }
+      }, 100) // Small delay to ensure connection is stable
+    }
+  }
+
   handleOutgoingConnection(conn) {
     console.log('Outgoing connection established with:', conn.peer, 'Connection state:', conn.open)
     
-    // Check if connection is already open
-    if (conn.open) {
-      console.log('Outgoing connection already open')
-      this.connections.set(conn.peer, conn)
-      this.emit('peerConnected', conn.peer)
-    } else {
-      conn.on('open', () => {
-        console.log('Outgoing connection opened for:', conn.peer)
-        this.connections.set(conn.peer, conn)
-        this.emit('peerConnected', conn.peer)
-      })
-    }
-
-    conn.on('data', (data) => {
-      this.handlePeerData(conn.peer, data)
-    })
-
-    conn.on('close', () => {
-      console.log('Outgoing connection closed for:', conn.peer)
-      this.connections.delete(conn.peer)
-      this.emit('peerDisconnected', conn.peer)
-    })
-
-    conn.on('error', (error) => {
-      console.error('Outgoing connection error for', conn.peer, ':', error)
-      this.connections.delete(conn.peer)
-      this.emit('peerDisconnected', conn.peer)
-    })
+    // Set up handlers immediately
+    this.setupConnectionHandlers(conn)
+    
+    // Add to connections
+    this.connections.set(conn.peer, conn)
+    this.emit('peerConnected', conn.peer)
   }
 
   handlePeerData(peerId, data) {
