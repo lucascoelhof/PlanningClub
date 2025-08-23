@@ -1,4 +1,5 @@
-import CryptoJS from 'crypto-js'
+// CryptoJS is loaded globally from CDN
+const CryptoJS = window.CryptoJS;
 
 export class UIManager {
   constructor() {

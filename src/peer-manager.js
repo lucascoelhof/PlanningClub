@@ -1,4 +1,5 @@
-import Peer from 'peerjs'
+// PeerJS is loaded globally from CDN
+const Peer = window.Peer;
 
 export class PeerManager {
   constructor() {
