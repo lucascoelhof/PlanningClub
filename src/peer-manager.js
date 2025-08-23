@@ -33,7 +33,15 @@ export class PeerManager {
       })
 
       this.peer.on('connection', (conn) => {
-        this.handleIncomingConnection(conn)
+        console.log('Received connection request from:', conn.peer)
+        // Accept the connection
+        conn.on('open', () => {
+          console.log('Connection accepted and opened from:', conn.peer)
+          this.handleIncomingConnection(conn)
+        })
+        conn.on('error', (error) => {
+          console.error('Error accepting connection from', conn.peer, ':', error)
+        })
       })
 
       this.peer.on('error', (error) => {
@@ -90,7 +98,15 @@ export class PeerManager {
       })
 
       this.peer.on('connection', (conn) => {
-        this.handleIncomingConnection(conn)
+        console.log('Received connection request from:', conn.peer)
+        // Accept the connection
+        conn.on('open', () => {
+          console.log('Connection accepted and opened from:', conn.peer)
+          this.handleIncomingConnection(conn)
+        })
+        conn.on('error', (error) => {
+          console.error('Error accepting connection from', conn.peer, ':', error)
+        })
       })
 
       this.peer.on('error', (error) => {
@@ -101,42 +117,24 @@ export class PeerManager {
   }
 
   handleIncomingConnection(conn) {
-    console.log('Incoming connection from:', conn.peer, 'Connection state:', conn.open)
+    console.log('Handling incoming connection from:', conn.peer)
     
-    // Check if connection is already open
-    if (conn.open) {
-      console.log('Connection already open, handling immediately')
-      this.connections.set(conn.peer, conn)
-      this.emit('peerConnected', conn.peer)
+    // Connection should already be open when this is called
+    this.connections.set(conn.peer, conn)
+    this.emit('peerConnected', conn.peer)
+    
+    // If we're the host, share the current connection list with new peer
+    if (this.isHost) {
+      this.broadcastConnectionList()
       
-      // If we're the host, share the current connection list with new peer
-      if (this.isHost) {
-        this.broadcastConnectionList()
-        
-        // Help establish P2P connections between all peers
+      // Help establish P2P connections between all peers
+      setTimeout(() => {
         conn.send({
           type: 'peer_list',
           peers: Array.from(this.connections.keys()).filter(id => id !== conn.peer)
         })
-      }
+      }, 100) // Small delay to ensure connection is stable
     }
-    
-    conn.on('open', () => {
-      console.log('Connection opened for:', conn.peer)
-      this.connections.set(conn.peer, conn)
-      this.emit('peerConnected', conn.peer)
-      
-      // If we're the host, share the current connection list with new peer
-      if (this.isHost) {
-        this.broadcastConnectionList()
-        
-        // Help establish P2P connections between all peers
-        conn.send({
-          type: 'peer_list',
-          peers: Array.from(this.connections.keys()).filter(id => id !== conn.peer)
-        })
-      }
-    })
 
     conn.on('data', (data) => {
       this.handlePeerData(conn.peer, data)

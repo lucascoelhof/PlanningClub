@@ -115,7 +115,11 @@ export class PlanningClubApp {
     })
 
     this.uiManager.on('navigate', (path) => {
-      this.router.navigate(path)
+      if (path === '/') {
+        this.router.navigate('home')
+      } else if (path === '/about') {
+        this.router.navigate('about')
+      }
     })
 
     // Game manager to peer manager bridge events
@@ -144,7 +148,7 @@ export class PlanningClubApp {
       this.gameManager.setSessionId(sessionId)
       
       await this.peerManager.createSession(sessionId)
-      this.router.navigate(`/${sessionId}`)
+      this.router.navigate('session', sessionId)
       this.uiManager.showGamePage(sessionId)
       this.gameManager.createSession(sessionId, playerData)
       
@@ -177,7 +181,7 @@ export class PlanningClubApp {
       analytics.trackUserJoined(false) // false = participant
     } catch (error) {
       this.uiManager.showError('Failed to join session: ' + error.message)
-      this.router.navigate('/')
+      this.router.navigate('home')
     }
   }
 
