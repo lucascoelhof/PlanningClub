@@ -8,7 +8,9 @@
     "deploy": "gh-pages -d dist",
     "test:puppeteer": "node tests/puppeteer-github-pages.test.js",
     "test:puppeteer:debug": "DEBUG=true node tests/puppeteer-github-pages.test.js",
-    "test:github-pages": "npm run test:puppeteer"
+    "test:puppeteer:comprehensive": "node tests/puppeteer-comprehensive.test.js",
+    "test:puppeteer:comprehensive:debug": "DEBUG=true node tests/puppeteer-comprehensive.test.js",
+    "test:github-pages": "npm run test:puppeteer:comprehensive"
   },
   "devDependencies": {
     "jest": "^30.0.5",

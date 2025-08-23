@@ -7,27 +7,48 @@ The Puppeteer tests simulate multiple browsers connecting to the deployed GitHub
 ### Running Tests
 
 ```bash
-# Run tests in headless mode
+# Basic tests (2 browsers)
 npm run test:puppeteer
-
-# Run tests with browser visible (debug mode)
 npm run test:puppeteer:debug
 
-# Alternative: run against GitHub Pages
+# Comprehensive tests (3 browsers) - RECOMMENDED
+npm run test:puppeteer:comprehensive
+npm run test:puppeteer:comprehensive:debug
+
+# Shorthand for comprehensive tests
 npm run test:github-pages
 ```
 
-### Test Coverage
+### Comprehensive Test Coverage
 
-The tests cover:
-1. Homepage loading
-2. Session creation by host
-3. Guest joining session via URL
-4. Both players seeing each other
-5. Voting functionality
-6. Show votes feature
-7. Clear votes feature
-8. Player disconnection handling
+The comprehensive test suite covers all your requirements:
+
+1. **Session Creation & URL Verification**
+   - User creates session with correct URL format
+   - URL contains proper session ID
+
+2. **Multiple Join Methods**
+   - Join via home page form (Session ID + Name)
+   - Join via direct session URL with name prompt
+
+3. **Persistence**
+   - Refreshing tab doesn't require re-entering name
+   - Session state is preserved
+
+4. **Player Management**
+   - No duplicate player names appear
+   - All players see each other correctly
+
+5. **Voting System**
+   - Vote selection highlights correctly
+   - Vote statistics appear after all users vote
+   - Users can change votes while statistics are showing
+   - Vote changes update statistics for all users
+
+6. **Vote Management**
+   - Clear votes removes highlighting for all users
+   - Clear votes hides statistics for all users
+   - System resets to initial state
 
 ### Requirements
 
