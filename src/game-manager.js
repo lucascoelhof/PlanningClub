@@ -97,20 +97,34 @@ export class GameManager {
     // Clear any reaction timer for this peer
     this.clearReactionTimer(peerId)
     
-    this.players.delete(peerId)
-    this.emit('playersUpdated', Array.from(this.players.values()))
-    this.checkVotingComplete()
+    if (this.players.has(peerId)) {
+      console.log('Removing disconnected player:', peerId)
+      this.players.delete(peerId)
+      this.emit('playersUpdated', Array.from(this.players.values()))
+      this.checkVotingComplete()
+      
+      // Notify other players about the disconnection
+      if (this.localPeerId) {
+        this.broadcast({
+          type: 'player_disconnected',
+          peerId: peerId
+        })
+      }
+    }
   }
 
   handlePeerMessage(peerId, data) {
     switch (data.type) {
       case 'player_data':
-        this.players.set(peerId, {
-          ...data.player,
-          id: peerId,
-          isLocal: false
-        })
-        this.emit('playersUpdated', Array.from(this.players.values()))
+        // Only add the player if it's not our local player
+        if (peerId !== this.localPeerId) {
+          this.players.set(peerId, {
+            ...data.player,
+            id: peerId,
+            isLocal: false
+          })
+          this.emit('playersUpdated', Array.from(this.players.values()))
+        }
         break
         
       case 'request_player_data':
@@ -119,6 +133,16 @@ export class GameManager {
             type: 'player_data',
             player: this.players.get(this.localPeerId)
           })
+        }
+        break
+        
+      case 'player_disconnected':
+        // Remove the disconnected player from our list
+        if (this.players.has(data.peerId)) {
+          console.log('Player disconnected:', data.peerId)
+          this.players.delete(data.peerId)
+          this.emit('playersUpdated', Array.from(this.players.values()))
+          this.checkVotingComplete()
         }
         break
         

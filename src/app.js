@@ -174,6 +174,7 @@ export class PlanningClubApp {
       }
       
       await this.peerManager.joinSession(sessionId)
+      this.router.navigate('session', sessionId)
       this.uiManager.showGamePage(sessionId)
       this.gameManager.joinSession(sessionId)
       
