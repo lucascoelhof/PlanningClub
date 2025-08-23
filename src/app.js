@@ -35,12 +35,20 @@ export class PlanningClubApp {
     })
 
     this.router.on('route:session', (sessionId) => {
-      // Only join if we're not already in this session (convert to string for comparison)
-      if (String(this.gameManager.sessionId) !== String(sessionId)) {
-        this.joinSession(sessionId)
+      // Check if user has already joined this session
+      const sessionData = this.getSessionData(sessionId)
+      
+      if (sessionData && sessionData.playerData) {
+        // User has already joined this session, rejoin with existing data
+        if (String(this.gameManager.sessionId) !== String(sessionId)) {
+          this.joinSession(sessionId, sessionData.playerData)
+        } else {
+          // We're already in this session, just show the game page
+          this.uiManager.showGamePage(sessionId)
+        }
       } else {
-        // We're already in this session, just show the game page
-        this.uiManager.showGamePage(sessionId)
+        // New user accessing shared link - show name prompt
+        this.uiManager.showJoinPrompt(sessionId)
       }
     })
 
@@ -129,6 +137,9 @@ export class PlanningClubApp {
       
       const sessionId = this.generateSessionId()
       
+      // Save session data to localStorage
+      this.saveSessionData(sessionId, playerData)
+      
       // Set sessionId first to prevent route handler from triggering joinSession
       this.gameManager.setSessionId(sessionId)
       
@@ -153,6 +164,8 @@ export class PlanningClubApp {
       }
       
       if (playerData) {
+        // Save session data to localStorage
+        this.saveSessionData(sessionId, playerData)
         this.gameManager.setPlayerData(playerData)
       }
       
@@ -186,5 +199,36 @@ export class PlanningClubApp {
 
   generateSessionId() {
     return Math.floor(Math.random() * 900000000) + 100000000
+  }
+
+  saveSessionData(sessionId, playerData) {
+    try {
+      const sessions = JSON.parse(localStorage.getItem('planningClubSessions') || '{}')
+      sessions[sessionId] = {
+        playerData,
+        joinedAt: Date.now()
+      }
+      // Keep only last 10 sessions to avoid localStorage bloat
+      const sessionKeys = Object.keys(sessions)
+      if (sessionKeys.length > 10) {
+        const sortedKeys = sessionKeys.sort((a, b) => sessions[a].joinedAt - sessions[b].joinedAt)
+        for (let i = 0; i < sessionKeys.length - 10; i++) {
+          delete sessions[sortedKeys[i]]
+        }
+      }
+      localStorage.setItem('planningClubSessions', JSON.stringify(sessions))
+    } catch (e) {
+      console.warn('Failed to save session data:', e)
+    }
+  }
+
+  getSessionData(sessionId) {
+    try {
+      const sessions = JSON.parse(localStorage.getItem('planningClubSessions') || '{}')
+      return sessions[sessionId] || null
+    } catch (e) {
+      console.warn('Failed to load session data:', e)
+      return null
+    }
   }
 }

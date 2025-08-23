@@ -37,6 +37,13 @@ export class UIManager {
     this.bindAboutPageEvents()
   }
 
+  showJoinPrompt(sessionId) {
+    this.currentPage = 'join-prompt'
+    this.ensureAppContainer()
+    this.appContainer.innerHTML = this.getJoinPromptHTML(sessionId)
+    this.bindJoinPromptEvents(sessionId)
+  }
+
   ensureAppContainer() {
     if (!this.appContainer) {
       this.appContainer = document.getElementById('app')
@@ -44,6 +51,44 @@ export class UIManager {
         throw new Error('App container element not found')
       }
     }
+  }
+
+  getJoinPromptHTML(sessionId) {
+    return `
+      <div class="home-page">
+        <div class="home-content">
+          <h1>♣ Planning Club ♣</h1>
+          <div class="home-actions">
+            <div class="card" style="max-width: 400px; margin: 0 auto;">
+              <h2>Join Session ${sessionId}</h2>
+              <p style="color: #666; margin-bottom: 1.5rem;">Enter your name to join this planning session</p>
+              <form id="join-prompt-form">
+                <div class="form-group">
+                  <label for="join-prompt-identity">Your Name or Email</label>
+                  <input type="text" id="join-prompt-identity" required maxlength="70" 
+                         placeholder="John Doe or john@example.com" autofocus>
+                  <small style="color: #666; font-size: 0.85em; margin-top: 0.25rem; display: block;">
+                    Enter your name or email address (for Gravatar)
+                  </small>
+                </div>
+                <button type="submit" class="btn">Join Session</button>
+              </form>
+            </div>
+          </div>
+          
+          <div id="error-message" class="error hidden"></div>
+          <div id="loading-message" class="loading hidden">Connecting...</div>
+        </div>
+        
+        <footer class="site-footer">
+          <div class="footer-content">
+            <span>Created by <a href="https://github.com/lucascoelhof" target="_blank" rel="noopener noreferrer">Lucas Coelho Figueiredo</a></span>
+            <span class="footer-separator">•</span>
+            <a href="/about" id="terms-link">Terms of Use</a>
+          </div>
+        </footer>
+      </div>
+    `
   }
 
   getHomePageHTML() {
@@ -199,6 +244,36 @@ export class UIManager {
       
       if (sessionId && identity && sessionId.match(/^\d{9}$/)) {
         this.showLoading(true)
+        const { name, email } = this.parseIdentity(identity)
+        const playerData = await this.createPlayerData(name, email)
+        this.emit('joinSession', sessionId, playerData)
+      }
+    })
+    
+    // Bind footer link events
+    const termsLink = document.getElementById('terms-link')
+    if (termsLink) {
+      termsLink.addEventListener('click', (e) => {
+        e.preventDefault()
+        this.emit('navigate', '/about')
+      })
+    }
+  }
+
+  bindJoinPromptEvents(sessionId) {
+    const joinPromptForm = document.getElementById('join-prompt-form')
+    
+    joinPromptForm.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const identity = document.getElementById('join-prompt-identity').value.trim()
+      
+      if (identity) {
+        this.showLoading(true)
+        // Clear any previous state before joining session
+        this.selectedVote = null
+        this.selectedReaction = null
+        this.votesRevealed = false
+        this.players = []
         const { name, email } = this.parseIdentity(identity)
         const playerData = await this.createPlayerData(name, email)
         this.emit('joinSession', sessionId, playerData)

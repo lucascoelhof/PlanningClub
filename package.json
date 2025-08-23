@@ -18,6 +18,12 @@
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
+    "gh-pages": "^6.3.0",
     "peerjs": "^1.5.5"
+  },
+  "homepage": "http://lucascoelhof.github.io/PlanningClub",
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   }
 }
