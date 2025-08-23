@@ -1,4 +1,3 @@
-import './style.css'
 import { PlanningClubApp } from './app.js'
 
 const app = new PlanningClubApp()
