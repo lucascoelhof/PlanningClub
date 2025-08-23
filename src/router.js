@@ -2,6 +2,8 @@ export class Router {
   constructor() {
     this.events = {}
     this.currentRoute = null
+    // Detect if we're on GitHub Pages
+    this.basePath = window.location.pathname.includes('/PlanningClub') ? '/PlanningClub' : ''
   }
 
   init() {
@@ -10,7 +12,12 @@ export class Router {
   }
 
   handleRouteChange() {
-    const path = window.location.pathname
+    let path = window.location.pathname
+    
+    // Remove base path if present
+    if (this.basePath && path.startsWith(this.basePath)) {
+      path = path.slice(this.basePath.length) || '/'
+    }
     
     if (path === '/' || path === '/index.html') {
       this.emit('route:home')
@@ -33,8 +40,9 @@ export class Router {
   }
 
   navigate(path) {
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path)
+    const fullPath = this.basePath + path
+    if (window.location.pathname !== fullPath) {
+      window.history.pushState({}, '', fullPath)
       this.handleRouteChange()
     }
   }

@@ -101,9 +101,28 @@ export class PeerManager {
   }
 
   handleIncomingConnection(conn) {
-    console.log('Incoming connection from:', conn.peer)
+    console.log('Incoming connection from:', conn.peer, 'Connection state:', conn.open)
+    
+    // Check if connection is already open
+    if (conn.open) {
+      console.log('Connection already open, handling immediately')
+      this.connections.set(conn.peer, conn)
+      this.emit('peerConnected', conn.peer)
+      
+      // If we're the host, share the current connection list with new peer
+      if (this.isHost) {
+        this.broadcastConnectionList()
+        
+        // Help establish P2P connections between all peers
+        conn.send({
+          type: 'peer_list',
+          peers: Array.from(this.connections.keys()).filter(id => id !== conn.peer)
+        })
+      }
+    }
     
     conn.on('open', () => {
+      console.log('Connection opened for:', conn.peer)
       this.connections.set(conn.peer, conn)
       this.emit('peerConnected', conn.peer)
       
@@ -124,34 +143,46 @@ export class PeerManager {
     })
 
     conn.on('close', () => {
+      console.log('Connection closed for:', conn.peer)
       this.connections.delete(conn.peer)
       this.emit('peerDisconnected', conn.peer)
     })
 
     conn.on('error', (error) => {
-      console.error('Connection error:', error)
+      console.error('Connection error for', conn.peer, ':', error)
       this.connections.delete(conn.peer)
       this.emit('peerDisconnected', conn.peer)
     })
   }
 
   handleOutgoingConnection(conn) {
-    console.log('Outgoing connection established with:', conn.peer)
+    console.log('Outgoing connection established with:', conn.peer, 'Connection state:', conn.open)
     
-    this.connections.set(conn.peer, conn)
-    this.emit('peerConnected', conn.peer)
+    // Check if connection is already open
+    if (conn.open) {
+      console.log('Outgoing connection already open')
+      this.connections.set(conn.peer, conn)
+      this.emit('peerConnected', conn.peer)
+    } else {
+      conn.on('open', () => {
+        console.log('Outgoing connection opened for:', conn.peer)
+        this.connections.set(conn.peer, conn)
+        this.emit('peerConnected', conn.peer)
+      })
+    }
 
     conn.on('data', (data) => {
       this.handlePeerData(conn.peer, data)
     })
 
     conn.on('close', () => {
+      console.log('Outgoing connection closed for:', conn.peer)
       this.connections.delete(conn.peer)
       this.emit('peerDisconnected', conn.peer)
     })
 
     conn.on('error', (error) => {
-      console.error('Connection error:', error)
+      console.error('Outgoing connection error for', conn.peer, ':', error)
       this.connections.delete(conn.peer)
       this.emit('peerDisconnected', conn.peer)
     })
