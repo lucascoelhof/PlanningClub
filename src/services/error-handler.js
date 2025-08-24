@@ -64,7 +64,7 @@ export class ErrorHandler {
     // Store recent errors in localStorage for debugging
     try {
       const recentErrors = this.errorLog.slice(0, 10) // Keep only 10 most recent
-      localStorage.setItem('planningClub_errorLog', JSON.stringify(recentErrors))
+      localStorage.setItem('rapidPlanning_errorLog', JSON.stringify(recentErrors))
     } catch (e) {
       // If localStorage is full or unavailable, ignore
     }
@@ -194,9 +194,9 @@ export class ErrorHandler {
 
   clearStoredData() {
     try {
-      // Clear planning club related data
+      // Clear RapidPlanning related data
       Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('planningClub')) {
+        if (key.startsWith('rapidPlanning')) {
           localStorage.removeItem(key)
         }
       })
@@ -255,7 +255,7 @@ export class ErrorHandler {
   clearErrorLog() {
     this.errorLog = []
     try {
-      localStorage.removeItem('planningClub_errorLog')
+      localStorage.removeItem('rapidPlanning_errorLog')
     } catch (e) {
       // Ignore
     }

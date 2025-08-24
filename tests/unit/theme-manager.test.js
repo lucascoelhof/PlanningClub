@@ -50,7 +50,7 @@ describe('ThemeManager', () => {
     });
 
     test('should load theme from localStorage if available', () => {
-      localStorage.setItem('planningClub_theme', 'light');
+      localStorage.setItem('rapidPlanning_theme', 'light');
       const newThemeManager = new ThemeManager();
       
       expect(newThemeManager.currentTheme).toBe('light');
@@ -90,7 +90,7 @@ describe('ThemeManager', () => {
     test('should save theme to localStorage', () => {
       themeManager.setTheme('light');
 
-      expect(localStorage.getItem('planningClub_theme')).toBe('light');
+      expect(localStorage.getItem('rapidPlanning_theme')).toBe('light');
     });
 
     test('should emit themeChanged event', () => {

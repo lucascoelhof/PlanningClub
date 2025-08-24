@@ -416,7 +416,7 @@ export class UIManager {
     return `
       <div class="home-page">
         <div class="home-content">
-          <h1>♣ Planning Club ♣</h1>
+          <h1>⚡ RapidPlanning ⚡</h1>
           <div class="home-actions">
             <div class="card" style="max-width: 400px; margin: 0 auto;">
               <h2>Join Session ${sessionId}</h2>
@@ -460,7 +460,7 @@ export class UIManager {
     return `
       <div class="home-page">
         <div class="home-content">
-          <h1>♣ Planning Club ♣</h1>
+          <h1>⚡ RapidPlanning ⚡</h1>
           <div class="home-actions">
             <div class="card">
               <h2>Create Session</h2>
@@ -527,7 +527,7 @@ export class UIManager {
       <div class="game-page">
         <div class="game-header">
           <div class="session-info">
-            <h2>♣ Planning Club ♣</h2>
+            <h2>⚡ RapidPlanning ⚡</h2>
             <div class="session-id">Session: ${sessionId}</div>
           </div>
         </div>
@@ -704,7 +704,7 @@ export class UIManager {
     return `
       <div class="about-page">
         <div class="about-header">
-          <h1>♣ Planning Club ♣</h1>
+          <h1>⚡ RapidPlanning ⚡</h1>
           <nav class="about-nav">
             <a href="/" id="home-link">← Back to Home</a>
           </nav>
@@ -717,10 +717,10 @@ export class UIManager {
               <p><strong>Last updated:</strong> ${new Date().toLocaleDateString()}</p>
               
               <h3>1. Acceptance of Terms</h3>
-              <p>By accessing and using Planning Club, you agree to be bound by these Terms of Use and all applicable laws and regulations.</p>
+              <p>By accessing and using RapidPlanning, you agree to be bound by these Terms of Use and all applicable laws and regulations.</p>
               
               <h3>2. Description of Service</h3>
-              <p>Planning Club is a web-based planning poker application that allows teams to estimate effort for tasks collaboratively. The service is provided "as is" without warranty of any kind.</p>
+              <p>RapidPlanning is a web-based planning poker application that allows teams to estimate effort for tasks collaboratively. The service is provided "as is" without warranty of any kind.</p>
               
               <h3>3. Privacy and Data</h3>
               <p>We collect minimal anonymous usage data to improve the service. No personal information is stored permanently. Session data is temporary and automatically deleted when sessions end.</p>
@@ -729,7 +729,7 @@ export class UIManager {
               <p>Users agree to use the service responsibly and not to engage in any activity that could harm the service or other users.</p>
               
               <h3>5. Limitation of Liability</h3>
-              <p>Planning Club is provided free of charge. We shall not be liable for any damages arising from the use or inability to use this service.</p>
+              <p>RapidPlanning is provided free of charge. We shall not be liable for any damages arising from the use or inability to use this service.</p>
               
               <h3>6. Changes to Terms</h3>
               <p>We reserve the right to modify these terms at any time. Continued use of the service constitutes acceptance of modified terms.</p>
@@ -739,7 +739,7 @@ export class UIManager {
           <section class="tech-section">
             <h2>This Website</h2>
             <div class="tech-content">
-              <p>Planning Club is built using modern web technologies to provide a fast, reliable, and user-friendly experience.</p>
+              <p>RapidPlanning is built using modern web technologies to provide a fast, reliable, and user-friendly experience.</p>
               
               <h3>Technologies Used:</h3>
               <ul>
@@ -1042,7 +1042,7 @@ export class UIManager {
 
   showError(message) {
     this.hideLoading()
-    console.error('Planning Club Error:', message)
+    console.error('RapidPlanning Error:', message)
     
     if (this.currentPage === 'home') {
       const errorEl = document.getElementById('error-message')

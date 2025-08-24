@@ -47,7 +47,7 @@ export class ThemeManager {
 
   getStoredTheme() {
     try {
-      const stored = localStorage.getItem('planningClub_theme')
+      const stored = localStorage.getItem('rapidPlanning_theme')
       if (stored && this.themes[stored]) {
         return stored
       }
@@ -147,7 +147,7 @@ export class ThemeManager {
 
   saveTheme(themeName) {
     try {
-      localStorage.setItem('planningClub_theme', themeName)
+      localStorage.setItem('rapidPlanning_theme', themeName)
     } catch (e) {
       console.warn('Could not save theme preference:', e)
     }

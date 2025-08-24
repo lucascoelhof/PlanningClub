@@ -77,7 +77,7 @@ describe('ErrorHandler', () => {
       errorHandler.handleError(error);
 
       expect(global.localStorage.setItem).toHaveBeenCalledWith(
-        'planningClub_errorLog',
+        'rapidPlanning_errorLog',
         expect.stringContaining('Test error')
       );
     });
@@ -245,7 +245,7 @@ describe('ErrorHandler', () => {
       errorHandler.clearErrorLog();
 
       expect(errorHandler.errorLog).toHaveLength(0);
-      expect(global.localStorage.removeItem).toHaveBeenCalledWith('planningClub_errorLog');
+      expect(global.localStorage.removeItem).toHaveBeenCalledWith('rapidPlanning_errorLog');
     });
   });
 
@@ -253,18 +253,18 @@ describe('ErrorHandler', () => {
     test('should clear planning club data', () => {
       Object.defineProperty(global.localStorage, 'keys', {
         value: jest.fn().mockReturnValue([
-          'planningClub_session1',
-          'planningClub_session2',
+          'rapidPlanning_session1',
+          'rapidPlanning_session2',
           'otherApp_data',
-          'planningClub_errorLog'
+          'rapidPlanning_errorLog'
         ])
       });
 
       errorHandler.clearStoredData();
 
-      expect(global.localStorage.removeItem).toHaveBeenCalledWith('planningClub_session1');
-      expect(global.localStorage.removeItem).toHaveBeenCalledWith('planningClub_session2');
-      expect(global.localStorage.removeItem).toHaveBeenCalledWith('planningClub_errorLog');
+      expect(global.localStorage.removeItem).toHaveBeenCalledWith('rapidPlanning_session1');
+      expect(global.localStorage.removeItem).toHaveBeenCalledWith('rapidPlanning_session2');
+      expect(global.localStorage.removeItem).toHaveBeenCalledWith('rapidPlanning_errorLog');
       expect(global.localStorage.removeItem).not.toHaveBeenCalledWith('otherApp_data');
     });
   });

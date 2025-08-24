@@ -1,10 +1,10 @@
 {
-  "name": "planning-clubs",
+  "name": "rapidplanning",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "mkdir -p dist && cp -r src dist/ && cp index.html dist/ && cp clubs.svg dist/ && cp README.md dist/",
+    "build": "mkdir -p dist && cp -r src dist/ && cp index.html dist/ && cp README.md dist/",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "test": "jest",

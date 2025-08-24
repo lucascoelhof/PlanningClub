@@ -7,7 +7,7 @@ import { ErrorHandler } from './services/error-handler.js'
 import { ThemeManager } from './services/theme-manager.js'
 import { analytics } from './services/analytics.js'
 
-export class PlanningClubApp {
+export class RapidPlanningApp {
   constructor() {
     this.router = new Router()
     this.peerManager = new PeerManager()
