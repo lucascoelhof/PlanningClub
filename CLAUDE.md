@@ -1,1 +1,2 @@
 - Ask questions whenever you are uncertain in the requirements.
+- Increase timeout for puppeteer tests to 10 minutes

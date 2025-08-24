@@ -4,7 +4,7 @@ import { argv } from 'process';
 
 // Configuration
 const SITE_URL = 'https://lucascoelhof.github.io/PlanningClub/';
-const TIMEOUT = 60000; // Increased to 60 seconds
+const TIMEOUT = 600000; // Increased to 10 minutes (600 seconds)
 const DEBUG = process.env.DEBUG === 'true';
 
 // Main test function

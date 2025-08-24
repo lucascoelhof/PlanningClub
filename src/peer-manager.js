@@ -11,10 +11,17 @@ export class PeerManager {
   }
 
   async createSession(sessionId) {
+    // Check if already connected
+    if (this.peer && this.peer.open) {
+      console.log('Already connected to peer network, not creating new connection')
+      return Promise.resolve()
+    }
+    
     this.sessionId = sessionId
     this.isHost = true
     
     return new Promise((resolve, reject) => {
+      console.log('Creating new peer connection for hosting session')
       // Try the default PeerJS cloud service first
       this.peer = new Peer(`host-${sessionId}`, {
         debug: 1,
@@ -35,10 +42,10 @@ export class PeerManager {
       this.peer.on('connection', (conn) => {
         console.log('Received connection request from:', conn.peer, 'Open:', conn.open)
         
-        // For incoming connections, set up handlers immediately
+        // Set up handlers for the connection
         this.setupConnectionHandlers(conn)
         
-        // If connection is already open, handle it
+        // Handle the connection when it opens
         if (conn.open) {
           console.log('Incoming connection already open')
           this.handleIncomingConnection(conn)
@@ -49,10 +56,6 @@ export class PeerManager {
             this.handleIncomingConnection(conn)
           })
         }
-        
-        conn.on('error', (error) => {
-          console.error('Error with connection from', conn.peer, ':', error)
-        })
       })
 
       this.peer.on('error', (error) => {
@@ -69,10 +72,17 @@ export class PeerManager {
   }
 
   async joinSession(sessionId) {
+    // Check if already connected
+    if (this.peer && this.peer.open) {
+      console.log('Already connected to peer network, not creating new connection')
+      return Promise.resolve()
+    }
+    
     this.sessionId = sessionId
     this.isHost = false
     
     return new Promise((resolve, reject) => {
+      console.log('Creating new peer connection for joining session')
       this.peer = new Peer({
         debug: 1,
         config: {
@@ -119,10 +129,10 @@ export class PeerManager {
       this.peer.on('connection', (conn) => {
         console.log('Received connection request from:', conn.peer, 'Open:', conn.open)
         
-        // For incoming connections, set up handlers immediately
+        // Set up handlers for the connection
         this.setupConnectionHandlers(conn)
         
-        // If connection is already open, handle it
+        // Handle the connection when it opens
         if (conn.open) {
           console.log('Incoming connection already open')
           this.handleIncomingConnection(conn)
@@ -133,10 +143,6 @@ export class PeerManager {
             this.handleIncomingConnection(conn)
           })
         }
-        
-        conn.on('error', (error) => {
-          console.error('Error with connection from', conn.peer, ':', error)
-        })
       })
 
       this.peer.on('error', (error) => {
@@ -149,6 +155,7 @@ export class PeerManager {
   setupConnectionHandlers(conn) {
     // Set up data, close, and error handlers immediately
     conn.on('data', (data) => {
+      console.log('Data received from', conn.peer, ':', data)
       this.handlePeerData(conn.peer, data)
     })
 
@@ -160,8 +167,7 @@ export class PeerManager {
 
     conn.on('error', (error) => {
       console.error('Connection error for', conn.peer, ':', error)
-      this.connections.delete(conn.peer)
-      this.emit('peerDisconnected', conn.peer)
+      // Don't delete connection on error, let close event handle it
     })
   }
 

@@ -147,7 +147,10 @@ export class PlanningClubApp {
       // Set sessionId first to prevent route handler from triggering joinSession
       this.gameManager.setSessionId(sessionId)
       
-      await this.peerManager.createSession(sessionId)
+      // Only create new connection if we don't have one already
+      if (!this.peerManager.peer || !this.peerManager.peer.open) {
+        await this.peerManager.createSession(sessionId)
+      }
       this.router.navigate('session', sessionId)
       this.uiManager.showGamePage(sessionId)
       this.gameManager.createSession(sessionId, playerData)
@@ -173,7 +176,11 @@ export class PlanningClubApp {
         this.gameManager.setPlayerData(playerData)
       }
       
-      await this.peerManager.joinSession(sessionId)
+      // Only create new connection if we don't have one already
+      if (!this.peerManager.peer || !this.peerManager.peer.open) {
+        await this.peerManager.joinSession(sessionId)
+      }
+      
       this.router.navigate('session', sessionId)
       this.uiManager.showGamePage(sessionId)
       this.gameManager.joinSession(sessionId)
