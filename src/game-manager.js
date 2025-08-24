@@ -171,7 +171,14 @@ export class GameManager {
               player.vote = voteData.vote
               this.players.set(peerId, player)
             } else {
-              console.log(`Player ${peerId} not found in local players map`)
+              console.log(`Creating missing player ${voteData.name} (${peerId}) with vote: ${voteData.vote}`)
+              // Create missing player entry
+              this.players.set(peerId, {
+                id: peerId,
+                name: voteData.name,
+                vote: voteData.vote,
+                isLocal: false
+              })
             }
           }
         }
