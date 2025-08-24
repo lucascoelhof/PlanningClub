@@ -237,6 +237,7 @@ export class GameManager {
     }
     
     this.emit('playersUpdated', Array.from(this.players.values()))
+    this.emit('votingComplete')
   }
 
   setReaction(reaction) {
