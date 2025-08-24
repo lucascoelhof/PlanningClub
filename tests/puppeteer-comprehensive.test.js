@@ -323,7 +323,7 @@ const runTests = async () => {
       );
       
       // Host shows votes
-      await page1.click('#show-votes-btn');
+      await page1.click('#show-votes');
       
       // All pages should now show revealed votes
       const checkVotesRevealed = async (page, pageName) => {
@@ -344,9 +344,9 @@ const runTests = async () => {
       await checkVotesRevealed(page3, 'Third');
       
       // Check statistics section appears
-      await page1.waitForSelector('.stats-section');
-      await page2.waitForSelector('.stats-section');
-      await page3.waitForSelector('.stats-section');
+      await page1.waitForSelector('.voting-stats-section');
+      await page2.waitForSelector('.voting-stats-section');
+      await page3.waitForSelector('.voting-stats-section');
     });
     
     // Test 8: Vote changes update statistics for all users
@@ -384,25 +384,37 @@ const runTests = async () => {
     // Test 9: Clear votes functionality
     await runTest('Clear votes removes highlighting and statistics for all users', async () => {
       // Host clears votes
-      await page1.click('#clear-votes-btn');
+      await page1.click('#clear-votes');
       
       // Wait for clear to propagate
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Check all pages have cleared votes
       const checkVotesCleared = async (page, pageName) => {
-        // Should show placeholder votes
-        await page.waitForSelector('.player-vote.placeholder', { timeout: 10000 });
-        const placeholders = await page.$$('.player-vote.placeholder');
-        expect(placeholders.length).toBe(3);
+        // Wait for votes to be cleared (should have no .player-vote elements with actual votes)
+        await page.waitForFunction(
+          () => {
+            const playerItems = document.querySelectorAll('.player-item');
+            // Check that no player shows a vote (neither ✓ nor actual vote)
+            for (let item of playerItems) {
+              const voteElement = item.querySelector('.player-vote');
+              if (voteElement && voteElement.textContent.trim()) {
+                return false;
+              }
+            }
+            return true;
+          },
+          { timeout: 10000 }
+        );
         
         // No cards should be selected
         const selectedCards = await page.$$('.vote-card.selected');
         expect(selectedCards.length).toBe(0);
         
-        // Stats section should be hidden
-        const statsSection = await page.$('.stats-section');
-        expect(statsSection).toBe(null);
+        // Stats content should be hidden
+        const statsContent = await page.$('.stats-content');
+        const isHidden = await statsContent?.evaluate(el => el.style.display === 'none');
+        expect(isHidden).toBeTruthy();
         
         console.log(`   ${pageName} votes cleared successfully`);
       };

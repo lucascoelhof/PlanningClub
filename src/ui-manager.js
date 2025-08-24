@@ -397,6 +397,7 @@ export class UIManager {
       clearBtn.addEventListener('click', () => {
         this.hideVotingStats()
         this.votesRevealed = false
+        this.clearVoteSelection()
         this.emit('clearVotes')
       })
     }
@@ -737,6 +738,11 @@ export class UIManager {
     if (statsContent) {
       statsContent.style.display = 'none'
     }
+  }
+  
+  clearVoteSelection() {
+    this.selectedVote = null
+    this.renderVoteCards()
   }
 
   calculateVotingSummary() {
