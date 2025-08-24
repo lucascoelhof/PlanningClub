@@ -47,6 +47,11 @@ export class PlanningClubApp {
       if (sessionData && sessionData.playerData) {
         // User has already joined this session, rejoin with existing data
         this.joinSession(sessionId, sessionData.playerData)
+        
+        // Restore game state after a short delay to ensure UI is ready
+        setTimeout(() => {
+          this.restoreGameState(sessionData.gameState)
+        }, 1000)
       } else {
         // New user accessing shared link - show name prompt
         this.uiManager.showJoinPrompt(sessionId)
@@ -64,6 +69,8 @@ export class PlanningClubApp {
 
     this.gameManager.on('votingComplete', () => {
       this.uiManager.revealVotes()
+      // Persist state after automatic vote reveal
+      this.persistCurrentState()
     })
 
     this.gameManager.on('reactionExpired', () => {
@@ -99,20 +106,28 @@ export class PlanningClubApp {
     this.uiManager.on('vote', (vote) => {
       this.gameManager.castVote(vote)
       analytics.trackVoteSubmitted()
+      // Persist state after voting
+      this.persistCurrentState()
     })
 
     this.uiManager.on('clearVotes', () => {
       this.gameManager.clearVotes()
       analytics.trackVotingStarted()
+      // Persist state after clearing votes
+      this.persistCurrentState()
     })
 
     this.uiManager.on('showVotes', () => {
       this.gameManager.showVotes()
       analytics.trackVotesRevealed()
+      // Persist state after showing votes
+      this.persistCurrentState()
     })
 
     this.uiManager.on('reaction', (reaction) => {
       this.gameManager.setReaction(reaction)
+      // Persist state after reaction change
+      this.persistCurrentState()
     })
 
     this.uiManager.on('navigate', (path) => {
@@ -217,13 +232,20 @@ export class PlanningClubApp {
     return Math.floor(Math.random() * 900000000) + 100000000
   }
 
-  saveSessionData(sessionId, playerData) {
+  saveSessionData(sessionId, playerData, gameState = null) {
     try {
       const sessions = JSON.parse(localStorage.getItem('planningClubSessions') || '{}')
+      
+      // Get existing session data or create new
+      const existingSession = sessions[sessionId] || {}
+      
       sessions[sessionId] = {
-        playerData,
-        joinedAt: Date.now()
+        playerData: playerData || existingSession.playerData,
+        gameState: gameState || existingSession.gameState,
+        joinedAt: existingSession.joinedAt || Date.now(),
+        lastUpdated: Date.now()
       }
+      
       // Keep only last 10 sessions to avoid localStorage bloat
       const sessionKeys = Object.keys(sessions)
       if (sessionKeys.length > 10) {
@@ -232,6 +254,7 @@ export class PlanningClubApp {
           delete sessions[sortedKeys[i]]
         }
       }
+      
       localStorage.setItem('planningClubSessions', JSON.stringify(sessions))
     } catch (e) {
       console.warn('Failed to save session data:', e)
@@ -245,6 +268,46 @@ export class PlanningClubApp {
     } catch (e) {
       console.warn('Failed to load session data:', e)
       return null
+    }
+  }
+
+  getCurrentGameState() {
+    return {
+      selectedVote: this.uiManager.selectedVote,
+      selectedReaction: this.uiManager.selectedReaction,
+      votesRevealed: this.gameManager.votesRevealed,
+      localPlayerVote: this.gameManager.getLocalPlayerVote(),
+      timestamp: Date.now()
+    }
+  }
+
+  restoreGameState(gameState) {
+    if (!gameState) return
+
+    // Restore UI state
+    if (gameState.selectedVote) {
+      this.uiManager.selectedVote = gameState.selectedVote
+      this.uiManager.renderVoteCards()
+    }
+
+    if (gameState.selectedReaction) {
+      this.uiManager.selectedReaction = gameState.selectedReaction
+      this.uiManager.renderReactionButtons()
+    }
+
+    if (gameState.votesRevealed) {
+      this.uiManager.votesRevealed = gameState.votesRevealed
+      this.gameManager.votesRevealed = gameState.votesRevealed
+      if (gameState.votesRevealed) {
+        this.uiManager.showVotingStats()
+      }
+    }
+  }
+
+  persistCurrentState() {
+    if (this.gameManager.sessionId) {
+      const gameState = this.getCurrentGameState()
+      this.saveSessionData(this.gameManager.sessionId, null, gameState)
     }
   }
 }

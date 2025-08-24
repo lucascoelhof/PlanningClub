@@ -10,6 +10,8 @@
     "test:puppeteer:debug": "DEBUG=true node tests/puppeteer-github-pages.test.js",
     "test:puppeteer:comprehensive": "node tests/puppeteer-comprehensive.test.js",
     "test:puppeteer:comprehensive:debug": "DEBUG=true node tests/puppeteer-comprehensive.test.js",
+    "test:refresh-persistence": "node tests/refresh-persistence.test.js",
+    "test:refresh-persistence:debug": "DEBUG=true node tests/refresh-persistence.test.js",
     "test:github-pages": "npm run test:puppeteer:comprehensive"
   },
   "devDependencies": {

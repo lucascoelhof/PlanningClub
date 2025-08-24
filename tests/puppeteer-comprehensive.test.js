@@ -276,14 +276,33 @@ const runTests = async () => {
       console.log(`   After refresh, guest still sees: ${players}`);
     });
     
-    // Test 6: Vote highlighting
-    await runTest('Vote selection highlights correctly', async () => {
+    // Test 6: Vote persistence after refresh
+    await runTest('Vote selection persists after refresh', async () => {
       // Host votes for "5"
       await page1.waitForSelector('.vote-card');
       const hostCards = await page1.$$('.vote-card');
       await hostCards[5].click(); // "5" is typically at index 5
       
-      // Verify selection highlighting
+      // Verify vote is selected
+      const selectedVote = await page1.$eval('.vote-card.selected', el => el.textContent.trim());
+      expect(selectedVote).toBe('5');
+      
+      // Refresh host page
+      await page1.reload({ waitUntil: 'networkidle2' });
+      
+      // Should still be in session and vote should be restored
+      await page1.waitForSelector('.session-info', { timeout: 10000 });
+      await page1.waitForSelector('.vote-card.selected', { timeout: 5000 });
+      
+      const restoredVote = await page1.$eval('.vote-card.selected', el => el.textContent.trim());
+      expect(restoredVote).toBe('5');
+      
+      console.log(`   Vote selection restored after refresh: ${restoredVote}`);
+    });
+    
+    // Test 7: Vote highlighting
+    await runTest('Vote selection highlights correctly', async () => {
+      // Host already voted for "5" in previous test, verify it's still selected
       await page1.waitForSelector('.vote-card.selected');
       const selectedCards = await page1.$$('.vote-card.selected');
       expect(selectedCards.length).toBe(1);
@@ -311,7 +330,7 @@ const runTests = async () => {
       console.log(`   Host voted: ${selectedVote}, Guest voted: ${guestSelected}, Third voted: ${thirdSelected}`);
     });
     
-    // Test 7: Voting statistics appear after all vote
+    // Test 8: Voting statistics appear after all vote
     await runTest('Voting statistics appear for all users after everyone votes', async () => {
       // Wait for all votes to sync
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -364,7 +383,7 @@ const runTests = async () => {
       await page3.waitForSelector('.voting-stats-section');
     });
     
-    // Test 8: Vote changes update statistics for all users
+    // Test 9: Vote changes update statistics for all users
     await runTest('Changing vote updates statistics for all users', async () => {
       // Host changes vote from "5" to "13"
       const hostCards = await page1.$$('.vote-card');
@@ -396,7 +415,7 @@ const runTests = async () => {
       await checkUpdatedVotes(page3, 'Third');
     });
     
-    // Test 9: Clear votes functionality
+    // Test 10: Clear votes functionality
     await runTest('Clear votes removes highlighting and statistics for all users', async () => {
       // Host clears votes
       await page1.click('#clear-votes');

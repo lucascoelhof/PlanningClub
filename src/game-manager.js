@@ -18,6 +18,11 @@ export class GameManager {
     this.sessionId = sessionId
   }
 
+  getLocalPlayerVote() {
+    const localPlayer = this.players.get(this.localPeerId)
+    return localPlayer ? localPlayer.vote : null
+  }
+
   createSession(sessionId, playerData) {
     this.sessionId = sessionId
     this.playerData = playerData
