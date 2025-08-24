@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Planning Club is a serverless, peer-to-peer planning estimation web application built with vanilla JavaScript and PeerJS. It uses WebRTC for direct browser-to-browser communication without requiring a backend server.
+RapidPlanning is a serverless, peer-to-peer planning estimation web application built with vanilla JavaScript and PeerJS. It uses WebRTC for direct browser-to-browser communication without requiring a backend server.
 
 ## Development Commands
 
@@ -30,7 +30,7 @@ npm run test:puppeteer
 
 ## Important Development Notes
 
-- **GitHub Pages Deployment**: The app is configured for GitHub Pages deployment with base path `/PlanningClub/`. Changes must be committed and pushed to test against the live site since tests run against the deployed GitHub Pages URL.
+- **GitHub Pages Deployment**: The app is configured for GitHub Pages deployment with base path `/RapidPlanning/`. Changes must be committed and pushed to test against the live site since tests run against the deployed GitHub Pages URL.
 
 - **CDN Dependencies**: The app uses CDN versions of PeerJS and CryptoJS loaded via script tags in `index.html` rather than npm imports, making it compatible with GitHub Pages static hosting without a build step for dependencies.
 

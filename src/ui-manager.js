@@ -753,7 +753,7 @@ export class UIManager {
               
               <h3>Open Source</h3>
               <p>This project is open source and available on GitHub. Feel free to contribute, report issues, or fork the project for your own use.</p>
-              <p><a href="https://github.com/lucascoelhof/PlanningClub" target="_blank" rel="noopener noreferrer" class="github-link">View on GitHub →</a></p>
+              <p><a href="https://github.com/lucascoelhof/RapidPlanning" target="_blank" rel="noopener noreferrer" class="github-link">View on GitHub →</a></p>
             </div>
           </section>
         </div>
