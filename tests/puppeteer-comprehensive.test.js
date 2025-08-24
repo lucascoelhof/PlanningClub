@@ -327,9 +327,9 @@ const runTests = async () => {
       
       // All pages should now show revealed votes
       const checkVotesRevealed = async (page, pageName) => {
-        await page.waitForSelector('.player-vote:not(.placeholder)', { timeout: 10000 });
-        const votes = await page.$$eval('.player-vote:not(.placeholder)', 
-          els => els.map(el => el.textContent.trim())
+        await page.waitForSelector('.player-vote', { timeout: 10000 });
+        const votes = await page.$$eval('.player-vote', 
+          els => els.map(el => el.textContent.trim()).filter(vote => vote && vote !== '✓')
         );
         expect(votes.length).toBe(3);
         expect(votes).toContain('5');
@@ -365,8 +365,8 @@ const runTests = async () => {
       
       // Check all pages show updated votes
       const checkUpdatedVotes = async (page, pageName) => {
-        const votes = await page.$$eval('.player-vote:not(.placeholder)', 
-          els => els.map(el => el.textContent.trim())
+        const votes = await page.$$eval('.player-vote', 
+          els => els.map(el => el.textContent.trim()).filter(vote => vote && vote !== '✓')
         );
         expect(votes.length).toBe(3);
         expect(votes).toContain('13'); // Host's new vote
