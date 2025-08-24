@@ -10,6 +10,7 @@ export class PlanningClubApp {
     this.peerManager = new PeerManager()
     this.gameManager = new GameManager()
     this.uiManager = new UIManager()
+    this.pendingGameState = null
     
     this.setupEventListeners()
   }
@@ -48,10 +49,8 @@ export class PlanningClubApp {
         // User has already joined this session, rejoin with existing data
         this.joinSession(sessionId, sessionData.playerData)
         
-        // Restore game state after a short delay to ensure UI is ready
-        setTimeout(() => {
-          this.restoreGameState(sessionData.gameState)
-        }, 1000)
+        // Store game state for restoration after UI is ready
+        this.pendingGameState = sessionData.gameState
       } else {
         // New user accessing shared link - show name prompt
         this.uiManager.showJoinPrompt(sessionId)
@@ -171,6 +170,14 @@ export class PlanningClubApp {
       this.uiManager.showGamePage(sessionId)
       this.gameManager.createSession(sessionId, playerData)
       
+      // Restore pending game state if available (for host refresh)
+      if (this.pendingGameState) {
+        setTimeout(() => {
+          this.restoreGameState(this.pendingGameState)
+          this.pendingGameState = null
+        }, 1500)
+      }
+      
       // Track room creation
       analytics.trackRoomCreated()
       analytics.trackUserJoined(true) // true = host
@@ -203,6 +210,14 @@ export class PlanningClubApp {
       this.router.navigate('session', sessionId)
       this.uiManager.showGamePage(sessionId)
       this.gameManager.joinSession(sessionId)
+      
+      // Restore pending game state if available
+      if (this.pendingGameState) {
+        setTimeout(() => {
+          this.restoreGameState(this.pendingGameState)
+          this.pendingGameState = null
+        }, 1500) // Give UI more time to fully render
+      }
       
       // Track participant joining
       analytics.trackUserJoined(false) // false = participant
@@ -272,41 +287,65 @@ export class PlanningClubApp {
   }
 
   getCurrentGameState() {
-    return {
-      selectedVote: this.uiManager.selectedVote,
-      selectedReaction: this.uiManager.selectedReaction,
-      votesRevealed: this.gameManager.votesRevealed,
-      localPlayerVote: this.gameManager.getLocalPlayerVote(),
-      timestamp: Date.now()
-    }
-  }
-
-  restoreGameState(gameState) {
-    if (!gameState) return
-
-    // Restore UI state
-    if (gameState.selectedVote) {
-      this.uiManager.selectedVote = gameState.selectedVote
-      this.uiManager.renderVoteCards()
-    }
-
-    if (gameState.selectedReaction) {
-      this.uiManager.selectedReaction = gameState.selectedReaction
-      this.uiManager.renderReactionButtons()
-    }
-
-    if (gameState.votesRevealed) {
-      this.uiManager.votesRevealed = gameState.votesRevealed
-      this.gameManager.votesRevealed = gameState.votesRevealed
-      if (gameState.votesRevealed) {
-        this.uiManager.showVotingStats()
+    try {
+      return {
+        selectedVote: this.uiManager ? this.uiManager.selectedVote : null,
+        selectedReaction: this.uiManager ? this.uiManager.selectedReaction : null,
+        votesRevealed: this.gameManager ? this.gameManager.votesRevealed : false,
+        localPlayerVote: this.gameManager ? this.gameManager.getLocalPlayerVote() : null,
+        timestamp: Date.now()
+      }
+    } catch (error) {
+      console.warn('Error getting current game state:', error)
+      return {
+        selectedVote: null,
+        selectedReaction: null,
+        votesRevealed: false,
+        localPlayerVote: null,
+        timestamp: Date.now()
       }
     }
   }
 
+  restoreGameState(gameState) {
+    if (!gameState) {
+      console.log('No game state to restore')
+      return
+    }
+
+    console.log('Restoring game state:', gameState)
+
+    try {
+      // Restore UI state
+      if (gameState.selectedVote && this.uiManager) {
+        this.uiManager.selectedVote = gameState.selectedVote
+        this.uiManager.renderVoteCards()
+        console.log('Restored selected vote:', gameState.selectedVote)
+      }
+
+      if (gameState.selectedReaction && this.uiManager) {
+        this.uiManager.selectedReaction = gameState.selectedReaction
+        this.uiManager.renderReactionButtons()
+        console.log('Restored selected reaction:', gameState.selectedReaction)
+      }
+
+      if (gameState.votesRevealed && this.uiManager && this.gameManager) {
+        this.uiManager.votesRevealed = gameState.votesRevealed
+        this.gameManager.votesRevealed = gameState.votesRevealed
+        if (gameState.votesRevealed) {
+          this.uiManager.showVotingStats()
+          console.log('Restored votes revealed state')
+        }
+      }
+    } catch (error) {
+      console.warn('Error restoring game state:', error)
+    }
+  }
+
   persistCurrentState() {
-    if (this.gameManager.sessionId) {
+    if (this.gameManager && this.gameManager.sessionId) {
       const gameState = this.getCurrentGameState()
+      console.log('Persisting game state:', gameState)
       this.saveSessionData(this.gameManager.sessionId, null, gameState)
     }
   }
