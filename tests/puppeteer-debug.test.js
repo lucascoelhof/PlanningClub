@@ -79,7 +79,14 @@ const runDebugTest = async () => {
     console.log('Step 3: Waiting for peer connection...');
     await new Promise(resolve => setTimeout(resolve, 5000));
     
-    // Check player count on both sides
+    // Check player count on both sides - wait for them to appear first
+    try {
+      await page1.waitForSelector('.player-item', { timeout: 5000 });
+      await page2.waitForSelector('.player-item', { timeout: 5000 });
+    } catch (e) {
+      console.log('Players not rendered yet');
+    }
+    
     const hostPlayerCount = await page1.$$eval('.player-item', items => items.length);
     const guestPlayerCount = await page2.$$eval('.player-item', items => items.length);
     

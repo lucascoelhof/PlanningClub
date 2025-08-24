@@ -206,12 +206,18 @@ export class PeerManager {
   }
 
   handlePeerData(peerId, data) {
+    // Prevent handling our own data (shouldn't happen but safeguard)
+    if (peerId === this.peer?.id) {
+      console.warn('Received data from self, ignoring')
+      return
+    }
+    
     console.log('Received data from', peerId, ':', data)
     
     if (data.type === 'peer_list' && !this.isHost) {
       // Connect to other peers in the session
       data.peers.forEach(peer => {
-        if (!this.connections.has(peer)) {
+        if (!this.connections.has(peer) && peer !== this.peer.id) {
           const conn = this.peer.connect(peer)
           conn.on('open', () => {
             this.handleOutgoingConnection(conn)
