@@ -161,6 +161,17 @@ export class GameManager {
         break
         
       case 'show_votes':
+        // Sync any missing vote data
+        if (data.allVotes) {
+          for (const [peerId, voteData] of Object.entries(data.allVotes)) {
+            if (this.players.has(peerId)) {
+              const player = this.players.get(peerId)
+              player.vote = voteData.vote
+              this.players.set(peerId, player)
+            }
+          }
+        }
+        
         this.showVotes(false) // Don't broadcast, we received it
         break
         
@@ -231,8 +242,20 @@ export class GameManager {
     this.votesRevealed = true
     
     if (shouldBroadcast) {
+      // Include all player vote data to ensure synchronization
+      const allVotes = {}
+      for (const [peerId, player] of this.players) {
+        if (player.vote) {
+          allVotes[peerId] = {
+            name: player.name,
+            vote: player.vote
+          }
+        }
+      }
+      
       this.broadcast({
-        type: 'show_votes'
+        type: 'show_votes',
+        allVotes: allVotes
       })
     }
     
