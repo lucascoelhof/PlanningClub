@@ -35,17 +35,18 @@ export class PlanningClubApp {
     })
 
     this.router.on('route:session', (sessionId) => {
+      // Check if we're already in this session to prevent infinite loops
+      if (String(this.gameManager.sessionId) === String(sessionId)) {
+        this.uiManager.showGamePage(sessionId)
+        return
+      }
+      
       // Check if user has already joined this session
       const sessionData = this.getSessionData(sessionId)
       
       if (sessionData && sessionData.playerData) {
         // User has already joined this session, rejoin with existing data
-        if (String(this.gameManager.sessionId) !== String(sessionId)) {
-          this.joinSession(sessionId, sessionData.playerData)
-        } else {
-          // We're already in this session, just show the game page
-          this.uiManager.showGamePage(sessionId)
-        }
+        this.joinSession(sessionId, sessionData.playerData)
       } else {
         // New user accessing shared link - show name prompt
         this.uiManager.showJoinPrompt(sessionId)
@@ -164,44 +165,33 @@ export class PlanningClubApp {
   }
 
   async joinSession(sessionId, playerData = null) {
-    console.log('joinSession called with:', sessionId, !!playerData)
     try {
       // Only cleanup if we're switching from one session to another
       if (this.gameManager.sessionId && String(this.gameManager.sessionId) !== String(sessionId)) {
-        console.log('Cleaning up previous session')
         this.cleanup()
       }
       
       if (playerData) {
-        console.log('Setting player data and saving to localStorage')
         // Save session data to localStorage
         this.saveSessionData(sessionId, playerData)
         this.gameManager.setPlayerData(playerData)
       }
       
+      // Set session ID first to prevent route handler from triggering joinSession again
+      this.gameManager.setSessionId(sessionId)
+      
       // Only create new connection if we don't have one already
       if (!this.peerManager.peer || !this.peerManager.peer.open) {
-        console.log('Creating new peer connection')
         await this.peerManager.joinSession(sessionId)
-      } else {
-        console.log('Using existing peer connection')
       }
       
-      console.log('Navigating to session URL')
       this.router.navigate('session', sessionId)
-      
-      console.log('Showing game page')
       this.uiManager.showGamePage(sessionId)
-      
-      console.log('Initializing game session')
       this.gameManager.joinSession(sessionId)
       
       // Track participant joining
       analytics.trackUserJoined(false) // false = participant
-      
-      console.log('joinSession completed successfully')
     } catch (error) {
-      console.error('joinSession failed:', error)
       this.uiManager.showError('Failed to join session: ' + error.message)
       this.router.navigate('home')
     }

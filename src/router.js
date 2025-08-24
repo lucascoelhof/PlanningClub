@@ -30,7 +30,6 @@ export class Router {
   }
 
   navigate(route, sessionId = null) {
-    console.log('Router navigate called with:', route, sessionId)
     const params = new URLSearchParams()
     
     if (route === 'session' && sessionId) {
@@ -43,15 +42,9 @@ export class Router {
     const queryString = params.toString()
     const newUrl = window.location.pathname + (queryString ? '?' + queryString : '')
     
-    console.log('Current URL:', window.location.href)
-    console.log('New URL:', newUrl)
-    
     if (window.location.href !== newUrl) {
-      console.log('Updating URL with pushState')
       window.history.pushState({}, '', newUrl)
       this.handleRouteChange()
-    } else {
-      console.log('URL already matches, not updating')
     }
   }
 
