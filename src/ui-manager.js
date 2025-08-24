@@ -593,7 +593,7 @@ export class UIManager {
             <div class="shortcuts-grid">
               <div class="shortcut-item">
                 <kbd>0-9, ½, ?</kbd>
-                <span>Vote (1 sec delay)</span>
+                <span>Vote (0.5s delay)</span>
               </div>
               <div class="shortcut-item">
                 <kbd>+ / =</kbd>
