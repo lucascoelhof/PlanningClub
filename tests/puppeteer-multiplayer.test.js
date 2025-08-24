@@ -1,11 +1,11 @@
 import puppeteer from 'puppeteer';
 
 // Configuration
-const SITE_URL = 'https://lucascoelhof.github.io/PlanningClub/';
+const SITE_URL = 'https://lucascoelhof.github.io/RapidPlanning/';
 const TIMEOUT = 30000; // 30 seconds timeout for operations
 const DEBUG = process.env.DEBUG === 'true'; // Set DEBUG=true to see browser
 
-describe('Planning Club Multiplayer Tests', () => {
+describe('RapidPlanning Multiplayer Tests', () => {
   let browser1, browser2;
   let page1, page2;
   let sessionId;
@@ -64,7 +64,7 @@ describe('Planning Club Multiplayer Tests', () => {
     
     // Check if the main title is present
     const title = await getTextContent(page1, 'h1');
-    expect(title).toContain('Planning Club');
+    expect(title).toContain('RapidPlanning');
     
     // Check if create and join buttons exist
     await page1.waitForSelector('#create-identity');
@@ -300,7 +300,7 @@ describe('Planning Club Multiplayer Tests', () => {
 
 // Run the tests when executed directly
 const runTests = async () => {
-  console.log('Starting Planning Club Multiplayer Tests...');
+  console.log('Starting RapidPlanning Multiplayer Tests...');
   console.log('Testing against:', SITE_URL);
   console.log('Debug mode:', DEBUG ? 'ON' : 'OFF');
   console.log('-----------------------------------\n');
@@ -405,7 +405,7 @@ const runTests = async () => {
     await runTest('Homepage loads correctly', async () => {
       await page1.goto(SITE_URL, { waitUntil: 'networkidle2' });
       const title = await getTextContent(page1, 'h1');
-      expect(title).toContain('Planning Club');
+      expect(title).toContain('RapidPlanning');
       await page1.waitForSelector('#create-identity');
       await page1.waitForSelector('#join-identity');
     });

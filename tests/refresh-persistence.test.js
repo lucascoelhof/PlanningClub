@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 
-const SITE_URL = process.env.LOCAL_TEST === 'true' ? 'http://localhost:3000/PlanningClub/' : 'https://lucascoelhof.github.io/PlanningClub/';
+const SITE_URL = process.env.LOCAL_TEST === 'true' ? 'http://localhost:3000/RapidPlanning/' : 'https://lucascoelhof.github.io/RapidPlanning/';
 const DEBUG = process.env.DEBUG === 'true';
 
 const refreshPersistenceTest = async () => {

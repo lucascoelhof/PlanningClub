@@ -262,7 +262,7 @@ class RapidPlanningTester {
   }
 
   async runAllTests() {
-    console.log('🧪 Starting Planning Club E2E Tests\n');
+    console.log('🧪 Starting RapidPlanning E2E Tests\n');
     
     try {
       await this.setup();

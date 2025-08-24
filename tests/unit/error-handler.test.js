@@ -250,7 +250,7 @@ describe('ErrorHandler', () => {
   });
 
   describe('data clearing', () => {
-    test('should clear planning club data', () => {
+    test('should clear RapidPlanning data', () => {
       Object.defineProperty(global.localStorage, 'keys', {
         value: jest.fn().mockReturnValue([
           'rapidPlanning_session1',

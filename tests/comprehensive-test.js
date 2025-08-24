@@ -320,7 +320,7 @@ class ComprehensiveTest {
   }
 
   async runAllTests() {
-    console.log('🧪 Starting Comprehensive Planning Club Tests\n');
+    console.log('🧪 Starting Comprehensive RapidPlanning Tests\n');
     
     try {
       await this.setup();

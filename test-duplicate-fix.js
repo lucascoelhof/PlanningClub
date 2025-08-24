@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 
-const SITE_URL = 'http://localhost:3000/PlanningClub/';
+const SITE_URL = 'http://localhost:3000/RapidPlanning/';
 
 const testDuplicatePlayersFix = async () => {
   console.log('🧪 Testing Duplicate Players Fix');

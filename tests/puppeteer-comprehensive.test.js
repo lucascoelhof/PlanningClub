@@ -3,13 +3,13 @@ import { fileURLToPath } from 'url';
 import { argv } from 'process';
 
 // Configuration
-const SITE_URL = 'https://lucascoelhof.github.io/PlanningClub/';
+const SITE_URL = 'https://lucascoelhof.github.io/RapidPlanning/';
 const TIMEOUT = 600000; // Increased to 10 minutes (600 seconds)
 const DEBUG = process.env.DEBUG === 'true';
 
 // Main test function
 const runTests = async () => {
-  console.log('🧪 Planning Club Comprehensive Test Suite');
+  console.log('🧪 RapidPlanning Comprehensive Test Suite');
   console.log('Testing against:', SITE_URL);
   console.log('Debug mode:', DEBUG ? 'ON' : 'OFF');
   console.log('=========================================\n');
@@ -495,7 +495,7 @@ const runTests = async () => {
     }
     
     if (results.failed === 0) {
-      console.log('\n🎉 All tests passed! Planning Club is working correctly.');
+      console.log('\n🎉 All tests passed! RapidPlanning is working correctly.');
     } else {
       console.log(`\n⚠️  ${results.failed} test(s) failed. Check the errors above.`);
     }

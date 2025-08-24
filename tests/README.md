@@ -1,4 +1,4 @@
-# Planning Club Tests
+# RapidPlanning Tests
 
 ## Puppeteer Tests
 

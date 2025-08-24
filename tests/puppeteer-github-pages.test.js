@@ -3,13 +3,13 @@ import { fileURLToPath } from 'url';
 import { argv } from 'process';
 
 // Configuration
-const SITE_URL = 'https://lucascoelhof.github.io/PlanningClub/';
+const SITE_URL = 'https://lucascoelhof.github.io/RapidPlanning/';
 const TIMEOUT = 30000; // 30 seconds timeout for operations
 const DEBUG = process.env.DEBUG === 'true'; // Set DEBUG=true to see browser
 
 // Main test function
 const runTests = async () => {
-  console.log('Starting Planning Club Multiplayer Tests...');
+  console.log('Starting RapidPlanning Multiplayer Tests...');
   console.log('Testing against:', SITE_URL);
   console.log('Debug mode:', DEBUG ? 'ON' : 'OFF');
   console.log('-----------------------------------\n');
@@ -116,7 +116,7 @@ const runTests = async () => {
     await runTest('Homepage loads correctly', async () => {
       await page1.goto(SITE_URL, { waitUntil: 'networkidle2' });
       const title = await getTextContent(page1, 'h1');
-      expect(title).toContain('Planning Club');
+      expect(title).toContain('RapidPlanning');
       await page1.waitForSelector('#create-identity');
       await page1.waitForSelector('#join-identity');
     });

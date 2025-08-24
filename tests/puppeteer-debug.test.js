@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 
-const SITE_URL = 'https://lucascoelhof.github.io/PlanningClub/';
+const SITE_URL = 'https://lucascoelhof.github.io/RapidPlanning/';
 
 const runDebugTest = async () => {
   console.log('🔍 Debug Test: PeerJS Connection');
