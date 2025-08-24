@@ -2,6 +2,9 @@ import { Router } from './router.js'
 import { PeerManager } from './peer-manager.js'
 import { GameManager } from './game-manager.js'
 import { UIManager } from './ui-manager.js'
+import { ConnectionManager } from './services/connection-manager.js'
+import { ErrorHandler } from './services/error-handler.js'
+import { ThemeManager } from './services/theme-manager.js'
 import { analytics } from './services/analytics.js'
 
 export class PlanningClubApp {
@@ -9,7 +12,10 @@ export class PlanningClubApp {
     this.router = new Router()
     this.peerManager = new PeerManager()
     this.gameManager = new GameManager()
-    this.uiManager = new UIManager()
+    this.connectionManager = new ConnectionManager()
+    this.themeManager = new ThemeManager()
+    this.uiManager = new UIManager(this.gameManager, this.connectionManager, this.themeManager)
+    this.errorHandler = new ErrorHandler(this.uiManager)
     this.pendingGameState = null
     
     this.setupEventListeners()
@@ -155,10 +161,26 @@ export class PlanningClubApp {
     this.gameManager.on('sendToPlayer', (peerId, data) => {
       this.peerManager.send(peerId, data)
     })
+
+    // Connection manager events
+    this.connectionManager.on('connectionLost', () => {
+      console.log('Connection lost - enabling offline mode')
+      this.handleConnectionLoss()
+    })
+
+    this.connectionManager.on('connectionRestored', () => {
+      console.log('Connection restored - attempting to reconnect')
+      this.handleConnectionRestored()
+    })
+
+    this.connectionManager.on('offlineModeEnabled', () => {
+      // Show offline capabilities
+      this.uiManager.showOfflineMessage()
+    })
   }
 
   async createSession(playerData) {
-    try {
+    return await this.errorHandler.safeAsync(async () => {
       // Only cleanup if we're switching from one session to another
       if (this.gameManager.sessionId) {
         this.cleanup()
@@ -191,9 +213,7 @@ export class PlanningClubApp {
       // Track room creation
       analytics.trackRoomCreated()
       analytics.trackUserJoined(true) // true = host
-    } catch (error) {
-      this.uiManager.showError('Failed to create session: ' + error.message)
-    }
+    }, { operation: 'createSession' })
   }
 
   async rejoinSessionBackground(sessionId, playerData) {
@@ -255,6 +275,26 @@ export class PlanningClubApp {
     }
   }
 
+  handleConnectionLoss() {
+    // Enable offline mode - we can still:
+    // 1. Show the UI and allow local interactions
+    // 2. Save state locally
+    // 3. Queue actions for when connection returns
+    this.connectionManager.enableOfflineMode()
+    
+    // Stop trying to send data over peer connections
+    this.peerManager.pauseConnections()
+  }
+
+  handleConnectionRestored() {
+    // Try to reconnect to the session if we were in one
+    if (this.gameManager.sessionId && this.gameManager.playerData) {
+      this.connectionManager.attemptReconnection(() => {
+        return this.rejoinSessionBackground(this.gameManager.sessionId, this.gameManager.playerData)
+      })
+    }
+  }
+
   cleanup() {
     // Track if user was in a room
     if (this.gameManager.sessionId) {
@@ -269,6 +309,11 @@ export class PlanningClubApp {
     
     // Hide loading states
     this.uiManager.hideLoading()
+    
+    // Cleanup connection manager
+    if (this.connectionManager) {
+      this.connectionManager.destroy()
+    }
   }
 
   generateSessionId() {

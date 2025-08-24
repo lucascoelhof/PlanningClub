@@ -4,18 +4,28 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "build": "mkdir -p dist && cp -r src dist/ && cp index.html dist/ && cp clubs.svg dist/ && cp README.md dist/",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "test:puppeteer": "node tests/puppeteer-github-pages.test.js",
     "test:puppeteer:debug": "DEBUG=true node tests/puppeteer-github-pages.test.js",
     "test:puppeteer:comprehensive": "node tests/puppeteer-comprehensive.test.js",
     "test:puppeteer:comprehensive:debug": "DEBUG=true node tests/puppeteer-comprehensive.test.js",
     "test:refresh-persistence": "node tests/refresh-persistence.test.js",
     "test:refresh-persistence:debug": "DEBUG=true node tests/refresh-persistence.test.js",
-    "test:github-pages": "npm run test:puppeteer:comprehensive"
+    "test:github-pages": "npm run test:puppeteer:comprehensive",
+    "test:all": "npm run test && npm run test:puppeteer:comprehensive"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "@jest/globals": "^30.0.5",
+    "babel-jest": "^30.0.5",
     "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
     "puppeteer": "^24.17.0",
     "vite": "^7.1.2"
   },

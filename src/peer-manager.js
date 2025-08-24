@@ -260,6 +260,18 @@ export class PeerManager {
     }
   }
 
+  pauseConnections() {
+    console.log('Pausing peer connections due to network issues')
+    // Don't close connections, just stop sending data
+    // This allows for potential recovery when network returns
+    this.connectionsPaused = true
+  }
+
+  resumeConnections() {
+    console.log('Resuming peer connections')
+    this.connectionsPaused = false
+  }
+
   disconnect() {
     this.connections.forEach((conn) => {
       conn.close()

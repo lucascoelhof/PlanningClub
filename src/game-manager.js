@@ -398,10 +398,84 @@ export class GameManager {
       voteCount[vote] = (voteCount[vote] || 0) + 1
     })
     
+    const consensus = this.detectConsensus(votes)
+    
     return {
       votes: voteCount,
       total: votes.length,
-      average: this.calculateAverage(votes)
+      average: this.calculateAverage(votes),
+      consensus: consensus
+    }
+  }
+
+  detectConsensus(votes) {
+    if (votes.length < 2) {
+      return { type: 'insufficient', message: 'Need more votes' }
+    }
+
+    // Perfect consensus - everyone voted the same
+    const uniqueVotes = [...new Set(votes)]
+    if (uniqueVotes.length === 1) {
+      return { 
+        type: 'perfect', 
+        message: `Perfect consensus on ${uniqueVotes[0]}!`,
+        highlight: true
+      }
+    }
+
+    // Check numeric consensus (within 1 point for Fibonacci-like scales)
+    const numericVotes = votes
+      .filter(v => !isNaN(parseFloat(v.replace('½', '.5'))))
+      .map(v => parseFloat(v.replace('½', '.5')))
+      .sort((a, b) => a - b)
+    
+    if (numericVotes.length >= votes.length * 0.8) { // At least 80% numeric votes
+      const min = numericVotes[0]
+      const max = numericVotes[numericVotes.length - 1]
+      const range = max - min
+      
+      if (range === 0) {
+        return { 
+          type: 'perfect', 
+          message: `Perfect consensus on ${min}!`,
+          highlight: true
+        }
+      } else if (range <= 2) {
+        return { 
+          type: 'close', 
+          message: `Close consensus (range: ${range})`,
+          highlight: false
+        }
+      } else if (range >= 10) {
+        return { 
+          type: 'divergent', 
+          message: `Wide range of estimates (${min}-${max})`,
+          highlight: false
+        }
+      }
+    }
+
+    // Check if most votes are the same (majority consensus)
+    const voteCount = {}
+    votes.forEach(vote => {
+      voteCount[vote] = (voteCount[vote] || 0) + 1
+    })
+    
+    const maxCount = Math.max(...Object.values(voteCount))
+    const maxVote = Object.keys(voteCount).find(vote => voteCount[vote] === maxCount)
+    
+    if (maxCount > votes.length * 0.6) { // More than 60% voted the same
+      return { 
+        type: 'majority', 
+        message: `Majority consensus on ${maxVote} (${maxCount}/${votes.length})`,
+        highlight: false
+      }
+    }
+
+    return { 
+      type: 'none', 
+      message: 'No consensus - discussion needed',
+      highlight: false
     }
   }
 

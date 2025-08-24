@@ -2,19 +2,368 @@
 const CryptoJS = window.CryptoJS;
 
 export class UIManager {
-  constructor() {
+  constructor(gameManager = null, connectionManager = null, themeManager = null) {
     this.events = {}
     this.currentPage = null
     this.players = []
     this.selectedVote = null
     this.selectedReaction = null
     this.votesRevealed = false
+    this.gameManager = gameManager
+    this.connectionManager = connectionManager
+    this.themeManager = themeManager
     
     this.reactions = ['👍', '👎', '😄', '😕', '😲', '🤔', '🔥', '❤️']
+    
+    this.setupConnectionStatusUI()
+    this.setupThemeUI()
+    this.setupKeyboardNavigation()
+  }
+
+  setupThemeUI() {
+    if (!this.themeManager) return
+    
+    // Listen for theme changes to update UI
+    this.themeManager.on('themeChanged', (themeInfo) => {
+      this.updateThemeToggle(themeInfo)
+    })
+  }
+
+  setupKeyboardNavigation() {
+    this.voteOptions = ['0', '½', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?']
+    this.keyBuffer = ''
+    this.keyTimeout = null
+    this.keyDelay = 500 // 0.5 second delay to prevent accidental voting
+    
+    document.addEventListener('keydown', (e) => {
+      // Only handle keyboard navigation when on game page
+      if (this.currentPage !== 'game') return
+      
+      // Don't handle keys when user is typing in inputs
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      
+      this.handleKeyboardInput(e)
+    })
+  }
+
+  handleKeyboardInput(e) {
+    const key = e.key
+    
+    // Handle special keys
+    switch (key) {
+      case 'Escape':
+        e.preventDefault()
+        this.clearVotes()
+        return
+        
+      case 'Enter':
+        e.preventDefault()
+        this.showVotes()
+        return
+        
+      case '+':
+      case '=': // Handle both + and = key
+        e.preventDefault()
+        this.navigateVote(1)
+        return
+        
+      case '-':
+      case '_': // Handle both - and _ key
+        e.preventDefault()
+        this.navigateVote(-1)
+        return
+    }
+    
+    // Handle number input for voting (including ½ and ? symbols)
+    if (/^[0-9½?]$/.test(key) || key === '½' || key === '?') {
+      e.preventDefault()
+      this.handleNumberInput(key)
+    }
+  }
+
+  handleNumberInput(key) {
+    // Add to buffer
+    this.keyBuffer += key
+    
+    // Clear existing timeout
+    if (this.keyTimeout) {
+      clearTimeout(this.keyTimeout)
+    }
+    
+    // Set new timeout to process the vote
+    this.keyTimeout = setTimeout(() => {
+      this.processVoteFromKeyboard()
+    }, this.keyDelay)
+  }
+
+  processVoteFromKeyboard() {
+    if (!this.keyBuffer) return
+    
+    // Try to find exact match first
+    let matchedVote = this.voteOptions.find(vote => vote === this.keyBuffer)
+    
+    // If no exact match, try partial matches for numbers
+    if (!matchedVote && /^[0-9]+$/.test(this.keyBuffer)) {
+      // For numeric input, try to find closest match
+      const numValue = parseInt(this.keyBuffer)
+      
+      // Find closest vote option
+      const numericOptions = this.voteOptions
+        .filter(opt => /^[0-9]+$/.test(opt))
+        .map(opt => parseInt(opt))
+        .sort((a, b) => a - b)
+      
+      let closest = numericOptions[0]
+      for (let option of numericOptions) {
+        if (Math.abs(option - numValue) < Math.abs(closest - numValue)) {
+          closest = option
+        }
+      }
+      
+      matchedVote = closest.toString()
+    }
+    
+    if (matchedVote) {
+      // For keyboard input, always select the vote (don't toggle)
+      this.selectedVote = matchedVote
+      this.renderVoteCards()
+      this.emit('vote', matchedVote)
+    }
+    
+    // Clear buffer
+    this.keyBuffer = ''
+    this.keyTimeout = null
+  }
+
+  navigateVote(direction) {
+    if (!this.selectedVote) {
+      // No vote selected, select first or last option
+      const index = direction > 0 ? 0 : this.voteOptions.length - 1
+      this.selectedVote = this.voteOptions[index]
+      this.renderVoteCards()
+      this.emit('vote', this.selectedVote)
+      return
+    }
+    
+    const currentIndex = this.voteOptions.indexOf(this.selectedVote)
+    if (currentIndex === -1) return
+    
+    const newIndex = currentIndex + direction
+    if (newIndex >= 0 && newIndex < this.voteOptions.length) {
+      this.selectedVote = this.voteOptions[newIndex]
+      this.renderVoteCards()
+      this.emit('vote', this.selectedVote)
+    }
+  }
+
+  clearVotes() {
+    this.selectedVote = null
+    this.renderVoteCards()
+    this.emit('clearVotes')
+  }
+
+  showVotes() {
+    this.emit('showVotes')
+  }
+
+  setupConnectionStatusUI() {
+    if (!this.connectionManager) return
+    
+    // Listen for connection status changes
+    this.connectionManager.on('statusChange', (status) => {
+      this.updateConnectionStatus(status)
+    })
+    
+    this.connectionManager.on('connectionLost', () => {
+      // Connection lost - handled silently
+    })
+    
+    this.connectionManager.on('connectionRestored', () => {
+      // Connection restored - handled silently  
+    })
+    
+    this.connectionManager.on('reconnectionFailed', () => {
+      // Reconnection failed - handled silently
+    })
   }
 
   init() {
     this.appContainer = document.getElementById('app')
+    this.createConnectionStatusElements()
+  }
+
+  createConnectionStatusElements() {
+    // Create top-right status bar
+    const statusBar = document.createElement('div')
+    statusBar.id = 'status-bar'
+    statusBar.className = 'status-bar'
+    
+    // Connection status indicator
+    const statusIndicator = document.createElement('div')
+    statusIndicator.id = 'connection-status'
+    statusIndicator.className = 'connection-status'
+    statusIndicator.innerHTML = `
+      <div class="connection-indicator">
+        <span class="connection-icon">🟢</span>
+        <span class="connection-text">Connected</span>
+      </div>
+    `
+    statusBar.appendChild(statusIndicator)
+    
+    // Theme toggle button
+    if (this.themeManager) {
+      const themeToggle = document.createElement('button')
+      themeToggle.id = 'theme-toggle'
+      themeToggle.className = 'theme-toggle-btn'
+      themeToggle.title = 'Switch theme'
+      
+      const themeInfo = this.themeManager.getEffectiveThemeInfo()
+      themeToggle.innerHTML = `
+        <span class="theme-icon">${themeInfo.info.icon}</span>
+      `
+      
+      themeToggle.onclick = () => {
+        this.themeManager.toggleTheme()
+      }
+      
+      statusBar.appendChild(themeToggle)
+    }
+    
+    document.body.appendChild(statusBar)
+  }
+
+  updateConnectionStatus(status) {
+    const statusElement = document.getElementById('connection-status')
+    if (!statusElement) return
+    
+    const statusMessage = this.connectionManager?.getStatusMessage() || {
+      type: 'info',
+      message: 'Unknown',
+      icon: '⚪'
+    }
+    
+    const indicator = statusElement.querySelector('.connection-indicator')
+    if (indicator) {
+      indicator.className = `connection-indicator ${statusMessage.type}`
+      indicator.querySelector('.connection-icon').textContent = statusMessage.icon
+      indicator.querySelector('.connection-text').textContent = statusMessage.message
+    }
+  }
+
+  updateThemeToggle(themeInfo) {
+    const themeToggle = document.getElementById('theme-toggle')
+    if (!themeToggle) return
+    
+    const themeIcon = themeToggle.querySelector('.theme-icon')
+    if (themeIcon) {
+      themeIcon.textContent = themeInfo.effective ? 
+        this.themeManager.themes[themeInfo.effective].icon : 
+        themeInfo.info.icon
+    }
+    
+    // Update title
+    themeToggle.title = `Current: ${themeInfo.info.name} theme${themeInfo.isAuto ? ` (${themeInfo.effective})` : ''}`
+  }
+
+
+  showOfflineMessage() {
+    // Offline message - handled silently
+  }
+
+  showErrorToast(errorMessage) {
+    // Error toast - use modal instead
+    this.showErrorModal(errorMessage)
+  }
+
+  showErrorModal(errorMessage) {
+    // Create modal backdrop
+    const modal = document.createElement('div')
+    modal.className = 'error-modal-backdrop'
+    modal.innerHTML = `
+      <div class="error-modal">
+        <div class="error-modal-header">
+          <h3>${errorMessage.title}</h3>
+        </div>
+        <div class="error-modal-body">
+          <p>${errorMessage.message}</p>
+        </div>
+        <div class="error-modal-footer">
+          <button class="btn btn-secondary" id="error-modal-dismiss">
+            Dismiss
+          </button>
+          ${errorMessage.action && errorMessage.action !== 'dismiss' ? `
+            <button class="btn btn-primary" id="error-modal-action">
+              <span class="text">${this.getActionButtonText(errorMessage.action)}</span>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `
+    
+    document.body.appendChild(modal)
+    
+    // Bind events
+    modal.querySelector('#error-modal-dismiss').onclick = () => {
+      modal.remove()
+    }
+    
+    const actionBtn = modal.querySelector('#error-modal-action')
+    if (actionBtn) {
+      actionBtn.onclick = () => {
+        this.handleErrorToastAction(errorMessage.action)
+        modal.remove()
+      }
+    }
+    
+    // Close on backdrop click
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.remove()
+      }
+    }
+    
+    return modal
+  }
+
+  getActionButtonText(action) {
+    switch (action) {
+      case 'retry': return 'Retry'
+      case 'refresh': return 'Refresh Page'
+      case 'auto_refresh': return 'Refreshing...'
+      case 'clear_data': return 'Clear Data'
+      default: return 'OK'
+    }
+  }
+
+
+  handleErrorToastAction(action) {
+    switch (action) {
+      case 'retry':
+        // Emit retry event that the app can listen to
+        this.emit('errorAction', { action: 'retry' })
+        break
+      case 'refresh':
+        window.location.reload()
+        break
+      case 'clear_data':
+        if (confirm('This will clear all stored data and you may need to rejoin your session. Continue?')) {
+          this.clearStoredData()
+          window.location.reload()
+        }
+        break
+    }
+  }
+
+  clearStoredData() {
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('planningClub')) {
+          localStorage.removeItem(key)
+        }
+      })
+    } catch (e) {
+      console.warn('Could not clear localStorage:', e)
+    }
   }
 
   showHomePage() {
@@ -62,17 +411,23 @@ export class UIManager {
           <div class="home-actions">
             <div class="card" style="max-width: 400px; margin: 0 auto;">
               <h2>Join Session ${sessionId}</h2>
-              <p style="color: #666; margin-bottom: 1.5rem;">Enter your name to join this planning session</p>
+              <p style="color: #666; margin-bottom: 1.5rem;">
+                Enter your name to join this planning session
+              </p>
               <form id="join-prompt-form">
                 <div class="form-group">
-                  <label for="join-prompt-identity">Your Name or Email</label>
+                  <label for="join-prompt-identity">
+                    Your Name or Email
+                  </label>
                   <input type="text" id="join-prompt-identity" required maxlength="70" 
                          placeholder="John Doe or john@example.com" autofocus>
                   <small style="color: #666; font-size: 0.85em; margin-top: 0.25rem; display: block;">
                     Enter your name or email address (for Gravatar)
                   </small>
                 </div>
-                <button type="submit" class="btn">Join Session</button>
+                <button type="submit" class="btn">
+                  Join Session
+                </button>
               </form>
             </div>
           </div>
@@ -102,14 +457,18 @@ export class UIManager {
               <h2>Create Session</h2>
               <form id="create-form">
                 <div class="form-group">
-                  <label for="create-identity">Your Name or Email</label>
+                  <label for="create-identity">
+                    Your Name or Email
+                  </label>
                   <input type="text" id="create-identity" required maxlength="70" 
                          placeholder="John Doe or john@example.com">
                   <small style="color: #666; font-size: 0.85em; margin-top: 0.25rem; display: block;">
                     Enter your name or email address (for Gravatar)
                   </small>
                 </div>
-                <button type="submit" class="btn">Create Session</button>
+                <button type="submit" class="btn">
+                  Create Session
+                </button>
               </form>
             </div>
             
@@ -117,18 +476,24 @@ export class UIManager {
               <h2>Join Session</h2>
               <form id="join-form">
                 <div class="form-group">
-                  <label for="join-session">Session ID</label>
+                  <label for="join-session">
+                    Session ID
+                  </label>
                   <input type="text" id="join-session" required pattern="\\d{9}" maxlength="9" placeholder="123456789">
                 </div>
                 <div class="form-group">
-                  <label for="join-identity">Your Name or Email</label>
+                  <label for="join-identity">
+                    Your Name or Email
+                  </label>
                   <input type="text" id="join-identity" required maxlength="70" 
                          placeholder="Jane Doe or jane@example.com">
                   <small style="color: #666; font-size: 0.85em; margin-top: 0.25rem; display: block;">
                     Enter your name or email address (for Gravatar)
                   </small>
                 </div>
-                <button type="submit" class="btn">Join Session</button>
+                <button type="submit" class="btn">
+                  Join Session
+                </button>
               </form>
             </div>
           </div>
@@ -178,10 +543,19 @@ export class UIManager {
           <div class="voting-stats-section">
             <h3>Voting Statistics</h3>
             <div class="stats-actions">
-              <button id="clear-votes" class="btn btn-secondary btn-small">Clear Votes</button>
-              <button id="show-votes" class="btn btn-secondary btn-small">Show Votes</button>
+              <button id="clear-votes" class="btn btn-secondary btn-small">
+                Clear Votes
+              </button>
+              <button id="show-votes" class="btn btn-secondary btn-small">
+                Show Votes
+              </button>
             </div>
             <div id="voting-stats" class="stats-content">
+              <div class="consensus-section">
+                <div id="consensus-indicator" class="consensus-indicator">
+                  <!-- Consensus status will be rendered here -->
+                </div>
+              </div>
               <div class="average-section">
                 <strong>Average:</strong>
                 <div class="average-value" id="average-value">-</div>
@@ -202,6 +576,32 @@ export class UIManager {
             <h3>Reactions</h3>
             <div id="reaction-buttons" class="reaction-buttons">
               <!-- Reaction buttons will be rendered here -->
+            </div>
+          </div>
+          
+          <div class="keyboard-shortcuts-section">
+            <h3>Keyboard Shortcuts</h3>
+            <div class="shortcuts-grid">
+              <div class="shortcut-item">
+                <kbd>0-9, ½, ?</kbd>
+                <span>Vote (1 sec delay)</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>+ / =</kbd>
+                <span>Next vote option</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>- / _</kbd>
+                <span>Previous vote option</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Enter</kbd>
+                <span>Show votes</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Esc</kbd>
+                <span>Clear votes</span>
+              </div>
             </div>
           </div>
         </div>
@@ -427,7 +827,6 @@ export class UIManager {
       if (e.target.classList.contains('vote-card')) {
         const vote = e.target.dataset.vote
         this.selectVote(vote)
-        this.emit('vote', vote)
       }
     }
     container.addEventListener('click', this.voteClickHandler)
@@ -462,6 +861,7 @@ export class UIManager {
   selectVote(vote) {
     this.selectedVote = this.selectedVote === vote ? null : vote
     this.renderVoteCards()
+    this.emit('vote', this.selectedVote)
   }
 
   selectReaction(reaction) {
@@ -705,12 +1105,13 @@ export class UIManager {
 
     const averageEl = document.getElementById('average-value')
     const breakdownEl = document.getElementById('votes-breakdown-content')
+    const consensusEl = document.getElementById('consensus-indicator')
     const statsContent = document.querySelector('.stats-content')
     
-    if (!averageEl || !breakdownEl || !statsContent) return
+    if (!averageEl || !breakdownEl || !consensusEl || !statsContent) return
 
-    // Calculate statistics from current players
-    const votingSummary = this.calculateVotingSummary()
+    // Get statistics from GameManager if available, otherwise calculate locally
+    const votingSummary = this.gameManager ? this.gameManager.getVotingSummary() : this.calculateVotingSummary()
     
     if (votingSummary.total === 0) {
       // Hide just the content, not the whole section
@@ -720,6 +1121,19 @@ export class UIManager {
 
     // Show the content
     statsContent.style.display = 'flex'
+
+    // Show consensus indicator
+    if (votingSummary.consensus) {
+      const consensus = votingSummary.consensus
+      consensusEl.innerHTML = `
+        <div class="consensus-message ${consensus.type} ${consensus.highlight ? 'highlight' : ''}">
+          ${consensus.message}
+        </div>
+      `
+      consensusEl.style.display = 'block'
+    } else {
+      consensusEl.style.display = 'none'
+    }
 
     // Show average
     if (votingSummary.average !== null) {
