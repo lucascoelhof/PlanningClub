@@ -164,13 +164,16 @@ export class PlanningClubApp {
   }
 
   async joinSession(sessionId, playerData = null) {
+    console.log('joinSession called with:', sessionId, !!playerData)
     try {
       // Only cleanup if we're switching from one session to another
       if (this.gameManager.sessionId && String(this.gameManager.sessionId) !== String(sessionId)) {
+        console.log('Cleaning up previous session')
         this.cleanup()
       }
       
       if (playerData) {
+        console.log('Setting player data and saving to localStorage')
         // Save session data to localStorage
         this.saveSessionData(sessionId, playerData)
         this.gameManager.setPlayerData(playerData)
@@ -178,16 +181,27 @@ export class PlanningClubApp {
       
       // Only create new connection if we don't have one already
       if (!this.peerManager.peer || !this.peerManager.peer.open) {
+        console.log('Creating new peer connection')
         await this.peerManager.joinSession(sessionId)
+      } else {
+        console.log('Using existing peer connection')
       }
       
+      console.log('Navigating to session URL')
       this.router.navigate('session', sessionId)
+      
+      console.log('Showing game page')
       this.uiManager.showGamePage(sessionId)
+      
+      console.log('Initializing game session')
       this.gameManager.joinSession(sessionId)
       
       // Track participant joining
       analytics.trackUserJoined(false) // false = participant
+      
+      console.log('joinSession completed successfully')
     } catch (error) {
+      console.error('joinSession failed:', error)
       this.uiManager.showError('Failed to join session: ' + error.message)
       this.router.navigate('home')
     }
