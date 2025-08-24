@@ -168,41 +168,33 @@ export class ConnectionManager {
       return {
         type: 'error',
         message: 'You\'re offline. Some features may not work.',
-        icon: '🔌'
+        icon: 'Offline'
       }
     }
     
     switch (this.connectionQuality) {
       case 'good':
-        return {
-          type: 'success',
-          message: 'Connected',
-          icon: '🟢'
-        }
+        return null // Don't show anything when connected properly
       case 'poor':
         return {
           type: 'warning',
           message: 'Poor connection. Some delays expected.',
-          icon: '🟡'
+          icon: 'Slow'
         }
       case 'very-poor':
         return {
           type: 'warning',
           message: 'Very slow connection. Features may be limited.',
-          icon: '🟠'
+          icon: 'Very Slow'
         }
       case 'offline':
         return {
           type: 'error',
           message: 'Connection lost. Working in offline mode.',
-          icon: '🔴'
+          icon: 'Offline'
         }
       default:
-        return {
-          type: 'info',
-          message: 'Checking connection...',
-          icon: '⚪'
-        }
+        return null // Don't show "Checking connection" message
     }
   }
 

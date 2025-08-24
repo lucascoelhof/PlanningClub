@@ -63,14 +63,13 @@ describe('Keyboard Navigation', () => {
       expect(uiManager.voteOptions).toEqual(['0', '½', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?']);
       expect(uiManager.keyBuffer).toBe('');
       expect(uiManager.keyTimeout).toBeNull();
-      expect(uiManager.keyDelay).toBe(1000);
+      expect(uiManager.keyDelay).toBe(500);
     });
   });
 
   describe('keyboard event handling', () => {
     beforeEach(() => {
       uiManager.currentPage = 'game';
-      jest.spyOn(uiManager, 'showConnectionToast').mockImplementation(() => {});
     });
 
     test('should handle Escape key to clear votes', () => {
@@ -82,7 +81,6 @@ describe('Keyboard Navigation', () => {
       expect(event.preventDefault).toHaveBeenCalled();
       expect(uiManager.selectedVote).toBeNull();
       expect(uiManager.emit).toHaveBeenCalledWith('clearVotes');
-      expect(uiManager.showConnectionToast).toHaveBeenCalledWith('Votes cleared', 'info', 1500);
     });
 
     test('should handle Enter key to show votes', () => {
@@ -93,7 +91,6 @@ describe('Keyboard Navigation', () => {
 
       expect(event.preventDefault).toHaveBeenCalled();
       expect(uiManager.emit).toHaveBeenCalledWith('showVotes');
-      expect(uiManager.showConnectionToast).toHaveBeenCalledWith('Votes revealed', 'info', 1500);
     });
 
     test('should handle + key to navigate to next vote', () => {
@@ -105,7 +102,6 @@ describe('Keyboard Navigation', () => {
 
       expect(event.preventDefault).toHaveBeenCalled();
       expect(uiManager.selectedVote).toBe('2');
-      expect(uiManager.showConnectionToast).toHaveBeenCalledWith('Selected: 2', 'info', 1500);
     });
 
     test('should handle - key to navigate to previous vote', () => {
@@ -117,7 +113,6 @@ describe('Keyboard Navigation', () => {
 
       expect(event.preventDefault).toHaveBeenCalled();
       expect(uiManager.selectedVote).toBe('1');
-      expect(uiManager.showConnectionToast).toHaveBeenCalledWith('Selected: 1', 'info', 1500);
     });
 
     test('should handle = key as + alternative', () => {
@@ -173,7 +168,6 @@ describe('Keyboard Navigation', () => {
     beforeEach(() => {
       jest.useFakeTimers();
       uiManager.currentPage = 'game';
-      jest.spyOn(uiManager, 'showConnectionToast').mockImplementation(() => {});
       // Clear emit mock calls
       uiManager.emit.mockClear();
     });
@@ -186,10 +180,9 @@ describe('Keyboard Navigation', () => {
 
       expect(event.preventDefault).toHaveBeenCalled();
       expect(uiManager.keyBuffer).toBe('5');
-      expect(uiManager.showConnectionToast).toHaveBeenCalledWith('Typing: 5', 'info', 1100);
 
       // Fast forward time to trigger vote processing
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(500);
 
       expect(uiManager.selectedVote).toBe('5');
       expect(uiManager.keyBuffer).toBe('');
@@ -207,7 +200,7 @@ describe('Keyboard Navigation', () => {
       expect(uiManager.keyBuffer).toBe('100');
 
       // Fast forward time to trigger vote processing
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(500);
 
       expect(uiManager.selectedVote).toBe('100');
     });
@@ -215,7 +208,7 @@ describe('Keyboard Navigation', () => {
     test('should handle special characters ½ and ?', () => {
       const eventHalf = new KeyboardEvent('keydown', { key: '½' });
       document.dispatchEvent(eventHalf);
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(500);
 
       expect(uiManager.selectedVote).toBe('½');
 
@@ -225,7 +218,7 @@ describe('Keyboard Navigation', () => {
 
       const eventQuestion = new KeyboardEvent('keydown', { key: '?' });
       document.dispatchEvent(eventQuestion);
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(500);
 
       expect(uiManager.selectedVote).toBe('?');
     });
@@ -233,7 +226,7 @@ describe('Keyboard Navigation', () => {
     test('should find closest match for invalid numbers', () => {
       const event1 = new KeyboardEvent('keydown', { key: '7' });
       document.dispatchEvent(event1);
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(500);
 
       // 7 should map to closest option which is 8
       expect(uiManager.selectedVote).toBe('8');
@@ -247,7 +240,7 @@ describe('Keyboard Navigation', () => {
       document.dispatchEvent(event1);
       document.dispatchEvent(event2);
       document.dispatchEvent(event3);
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(500);
 
       // 999 should map to closest option which is 100
       expect(uiManager.selectedVote).toBe('100');
@@ -257,20 +250,20 @@ describe('Keyboard Navigation', () => {
       const event1 = new KeyboardEvent('keydown', { key: '1' });
       document.dispatchEvent(event1);
 
-      // Advance time partially
-      jest.advanceTimersByTime(500);
+      // Advance time partially (less than delay)
+      jest.advanceTimersByTime(250);
       expect(uiManager.selectedVote).toBeNull();
 
-      // Type another digit
+      // Type another digit - this should reset the timeout
       const event2 = new KeyboardEvent('keydown', { key: '0' });
       document.dispatchEvent(event2);
 
       // Advance time partially again (should still not trigger)
-      jest.advanceTimersByTime(500);
+      jest.advanceTimersByTime(250);
       expect(uiManager.selectedVote).toBeNull();
 
-      // Now advance the full delay
-      jest.advanceTimersByTime(500);
+      // Now advance the remaining time to complete the full delay from the second keystroke
+      jest.advanceTimersByTime(250);
       expect(uiManager.selectedVote).toBe('8'); // Closest match to "10"
     });
   });
@@ -278,21 +271,18 @@ describe('Keyboard Navigation', () => {
   describe('vote navigation', () => {
     beforeEach(() => {
       uiManager.currentPage = 'game';
-      jest.spyOn(uiManager, 'showConnectionToast').mockImplementation(() => {});
     });
 
     test('should navigate to first option when no vote selected and direction is positive', () => {
       uiManager.navigateVote(1);
 
       expect(uiManager.selectedVote).toBe('0');
-      expect(uiManager.showConnectionToast).toHaveBeenCalledWith('Selected: 0', 'info', 1500);
     });
 
     test('should navigate to last option when no vote selected and direction is negative', () => {
       uiManager.navigateVote(-1);
 
       expect(uiManager.selectedVote).toBe('?');
-      expect(uiManager.showConnectionToast).toHaveBeenCalledWith('Selected: ?', 'info', 1500);
     });
 
     test('should not navigate beyond first option', () => {

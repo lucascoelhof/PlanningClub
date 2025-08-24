@@ -198,14 +198,15 @@ export class UIManager {
     statusBar.id = 'status-bar'
     statusBar.className = 'status-bar'
     
-    // Connection status indicator
+    // Connection status indicator (initially hidden)
     const statusIndicator = document.createElement('div')
     statusIndicator.id = 'connection-status'
     statusIndicator.className = 'connection-status'
+    statusIndicator.style.display = 'none' // Start hidden
     statusIndicator.innerHTML = `
       <div class="connection-indicator">
-        <span class="connection-icon">🟢</span>
-        <span class="connection-text">Connected</span>
+        <span class="connection-icon"></span>
+        <span class="connection-text"></span>
       </div>
     `
     statusBar.appendChild(statusIndicator)
@@ -230,17 +231,25 @@ export class UIManager {
     }
     
     document.body.appendChild(statusBar)
+    
+    // Trigger initial connection status update
+    this.updateConnectionStatus()
   }
 
   updateConnectionStatus(status) {
     const statusElement = document.getElementById('connection-status')
     if (!statusElement) return
     
-    const statusMessage = this.connectionManager?.getStatusMessage() || {
-      type: 'info',
-      message: 'Unknown',
-      icon: '⚪'
+    const statusMessage = this.connectionManager?.getStatusMessage()
+    
+    // Hide status when connection is good (statusMessage is null)
+    if (!statusMessage) {
+      statusElement.style.display = 'none'
+      return
     }
+    
+    // Show status element when there's an issue
+    statusElement.style.display = 'block'
     
     const indicator = statusElement.querySelector('.connection-indicator')
     if (indicator) {

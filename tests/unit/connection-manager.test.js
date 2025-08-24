@@ -12,6 +12,9 @@ describe('ConnectionManager', () => {
   let mockEventListeners = {};
 
   beforeEach(() => {
+    // Clear any existing mocks first
+    jest.clearAllMocks();
+    
     // Mock window event listeners
     global.window.addEventListener = jest.fn((event, handler) => {
       mockEventListeners[event] = handler;
@@ -29,7 +32,6 @@ describe('ConnectionManager', () => {
     });
     
     connectionManager = new ConnectionManager();
-    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -132,14 +134,12 @@ describe('ConnectionManager', () => {
   });
 
   describe('status messages', () => {
-    test('should return correct status message for good connection', () => {
+    test('should return null for good connection (no status needed)', () => {
       connectionManager.connectionQuality = 'good';
       connectionManager.isOnline = true;
       
       const status = connectionManager.getStatusMessage();
-      expect(status.type).toBe('success');
-      expect(status.message).toBe('Connected');
-      expect(status.icon).toBe('🟢');
+      expect(status).toBe(null);
     });
 
     test('should return correct status message for offline', () => {
@@ -148,7 +148,7 @@ describe('ConnectionManager', () => {
       const status = connectionManager.getStatusMessage();
       expect(status.type).toBe('error');
       expect(status.message).toBe('You\'re offline. Some features may not work.');
-      expect(status.icon).toBe('🔌');
+      expect(status.icon).toBe('Offline');
     });
 
     test('should return correct status message for poor connection', () => {
@@ -158,7 +158,15 @@ describe('ConnectionManager', () => {
       const status = connectionManager.getStatusMessage();
       expect(status.type).toBe('warning');
       expect(status.message).toBe('Poor connection. Some delays expected.');
-      expect(status.icon).toBe('🟡');
+      expect(status.icon).toBe('Slow');
+    });
+
+    test('should return null for unknown connection quality', () => {
+      connectionManager.connectionQuality = 'unknown';
+      connectionManager.isOnline = true;
+      
+      const status = connectionManager.getStatusMessage();
+      expect(status).toBe(null);
     });
   });
 
