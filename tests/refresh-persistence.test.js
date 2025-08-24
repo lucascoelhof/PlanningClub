@@ -106,7 +106,7 @@ const refreshPersistenceTest = async () => {
       // Host votes
       await page1.waitForSelector('.vote-card');
       const hostCards = await page1.$$('.vote-card');
-      await hostCards[3].click(); // "5"
+      await hostCards[5].click(); // "5" is at index 5
       
       // Verify vote is selected
       const selectedVote = await page1.$eval('.vote-card.selected', el => el.textContent.trim());

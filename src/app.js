@@ -308,25 +308,18 @@ export class PlanningClubApp {
   }
 
   restoreGameState(gameState) {
-    if (!gameState) {
-      console.log('No game state to restore')
-      return
-    }
-
-    console.log('Restoring game state:', gameState)
+    if (!gameState) return
 
     try {
       // Restore UI state
       if (gameState.selectedVote && this.uiManager) {
         this.uiManager.selectedVote = gameState.selectedVote
         this.uiManager.renderVoteCards()
-        console.log('Restored selected vote:', gameState.selectedVote)
       }
 
       if (gameState.selectedReaction && this.uiManager) {
         this.uiManager.selectedReaction = gameState.selectedReaction
         this.uiManager.renderReactionButtons()
-        console.log('Restored selected reaction:', gameState.selectedReaction)
       }
 
       if (gameState.votesRevealed && this.uiManager && this.gameManager) {
@@ -334,7 +327,6 @@ export class PlanningClubApp {
         this.gameManager.votesRevealed = gameState.votesRevealed
         if (gameState.votesRevealed) {
           this.uiManager.showVotingStats()
-          console.log('Restored votes revealed state')
         }
       }
     } catch (error) {
@@ -345,7 +337,6 @@ export class PlanningClubApp {
   persistCurrentState() {
     if (this.gameManager && this.gameManager.sessionId) {
       const gameState = this.getCurrentGameState()
-      console.log('Persisting game state:', gameState)
       this.saveSessionData(this.gameManager.sessionId, null, gameState)
     }
   }
