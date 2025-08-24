@@ -47,10 +47,20 @@ export class PlanningClubApp {
       
       if (sessionData && sessionData.playerData) {
         // User has already joined this session, rejoin with existing data
-        this.joinSession(sessionId, sessionData.playerData)
+        // Show game page immediately to ensure UI is available
+        this.gameManager.setSessionId(sessionId)
+        this.gameManager.setPlayerData(sessionData.playerData)
+        this.uiManager.showGamePage(sessionId)
         
-        // Store game state for restoration after UI is ready
-        this.pendingGameState = sessionData.gameState
+        // Restore game state immediately after UI is rendered
+        if (sessionData.gameState) {
+          setTimeout(() => {
+            this.restoreGameState(sessionData.gameState)
+          }, 100) // Short delay to ensure DOM is ready
+        }
+        
+        // Then attempt to rejoin session in background (without adding local player again)
+        this.rejoinSessionBackground(sessionId, sessionData.playerData)
       } else {
         // New user accessing shared link - show name prompt
         this.uiManager.showJoinPrompt(sessionId)
@@ -186,6 +196,24 @@ export class PlanningClubApp {
     }
   }
 
+  async rejoinSessionBackground(sessionId, playerData) {
+    try {
+      // Only create new connection if we don't have one already
+      if (!this.peerManager.peer || !this.peerManager.peer.open) {
+        await this.peerManager.joinSession(sessionId)
+      }
+      
+      // Don't call gameManager.joinSession() as it would add local player again
+      // The local player is already added by setPlayerData() above
+      
+      // Track participant joining
+      analytics.trackUserJoined(false) // false = participant
+    } catch (error) {
+      console.warn('Failed to rejoin session in background:', error.message)
+      // Don't navigate away on peer connection failures during refresh
+    }
+  }
+
   async joinSession(sessionId, playerData = null) {
     try {
       // Only cleanup if we're switching from one session to another
@@ -315,17 +343,39 @@ export class PlanningClubApp {
       if (gameState.selectedVote && this.uiManager) {
         this.uiManager.selectedVote = gameState.selectedVote
         this.uiManager.renderVoteCards()
+        
+        // Also restore the vote in game manager for local player
+        if (this.gameManager && this.gameManager.localPeerId) {
+          const localPlayer = this.gameManager.players.get(this.gameManager.localPeerId)
+          if (localPlayer) {
+            localPlayer.vote = gameState.selectedVote
+            this.gameManager.players.set(this.gameManager.localPeerId, localPlayer)
+            this.gameManager.emit('playersUpdated', Array.from(this.gameManager.players.values()))
+          }
+        }
       }
 
       if (gameState.selectedReaction && this.uiManager) {
         this.uiManager.selectedReaction = gameState.selectedReaction
         this.uiManager.renderReactionButtons()
+        
+        // Also restore the reaction in game manager for local player
+        if (this.gameManager && this.gameManager.localPeerId) {
+          const localPlayer = this.gameManager.players.get(this.gameManager.localPeerId)
+          if (localPlayer) {
+            localPlayer.reaction = gameState.selectedReaction
+            this.gameManager.players.set(this.gameManager.localPeerId, localPlayer)
+            this.gameManager.emit('playersUpdated', Array.from(this.gameManager.players.values()))
+          }
+        }
       }
 
       if (gameState.votesRevealed && this.uiManager && this.gameManager) {
         this.uiManager.votesRevealed = gameState.votesRevealed
         this.gameManager.votesRevealed = gameState.votesRevealed
         if (gameState.votesRevealed) {
+          // Update players in UI manager from game manager
+          this.uiManager.updatePlayers(Array.from(this.gameManager.players.values()))
           this.uiManager.showVotingStats()
         }
       }
