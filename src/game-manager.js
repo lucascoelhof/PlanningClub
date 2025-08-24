@@ -163,15 +163,12 @@ export class GameManager {
       case 'show_votes':
         // Sync any missing vote data
         if (data.allVotes) {
-          console.log('Received show_votes with allVotes:', data.allVotes)
           for (const [peerId, voteData] of Object.entries(data.allVotes)) {
             if (this.players.has(peerId)) {
               const player = this.players.get(peerId)
-              console.log(`Syncing vote for ${player.name} (${peerId}): ${voteData.vote}`)
               player.vote = voteData.vote
               this.players.set(peerId, player)
             } else {
-              console.log(`Creating missing player ${voteData.name} (${peerId}) with vote: ${voteData.vote}`)
               // Create missing player entry
               this.players.set(peerId, {
                 id: peerId,
@@ -264,7 +261,6 @@ export class GameManager {
         }
       }
       
-      console.log('Broadcasting show_votes with allVotes:', allVotes)
       
       this.broadcast({
         type: 'show_votes',

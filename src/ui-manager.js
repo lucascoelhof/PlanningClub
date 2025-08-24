@@ -419,13 +419,18 @@ export class UIManager {
       </div>
     `).join('')
 
-    container.addEventListener('click', (e) => {
+    // Remove existing listeners and add a single click handler
+    if (this.voteClickHandler) {
+      container.removeEventListener('click', this.voteClickHandler)
+    }
+    this.voteClickHandler = (e) => {
       if (e.target.classList.contains('vote-card')) {
         const vote = e.target.dataset.vote
         this.selectVote(vote)
         this.emit('vote', vote)
       }
-    })
+    }
+    container.addEventListener('click', this.voteClickHandler)
   }
 
   renderReactionButtons() {
@@ -473,6 +478,16 @@ export class UIManager {
   updatePlayers(players) {
     this.players = players
     this.renderPlayers()
+    
+    // Check if all votes have been cleared
+    const hasAnyVotes = players.some(player => player.vote !== null)
+    if (!hasAnyVotes && this.selectedVote !== null) {
+      // All votes were cleared, clear local selection
+      this.selectedVote = null
+      this.renderVoteCards()
+      this.votesRevealed = false
+      this.hideVotingStats()
+    }
     
     // Update stats if votes are revealed
     if (this.votesRevealed) {
