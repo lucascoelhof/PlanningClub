@@ -1,4 +1,4 @@
-# Planning Club
+# RapidPlanning
 
 A serverless, peer-to-peer planning estimation web application for agile teams. No server required - all communication happens directly between users through WebRTC.
 

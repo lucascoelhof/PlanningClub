@@ -322,7 +322,7 @@ export class RapidPlanningApp {
 
   saveSessionData(sessionId, playerData, gameState = null) {
     try {
-      const sessions = JSON.parse(localStorage.getItem('planningClubSessions') || '{}')
+      const sessions = JSON.parse(localStorage.getItem('rapidPlanningSessions') || '{}')
       
       // Get existing session data or create new
       const existingSession = sessions[sessionId] || {}
@@ -343,7 +343,7 @@ export class RapidPlanningApp {
         }
       }
       
-      localStorage.setItem('planningClubSessions', JSON.stringify(sessions))
+      localStorage.setItem('rapidPlanningSessions', JSON.stringify(sessions))
     } catch (e) {
       console.warn('Failed to save session data:', e)
     }
@@ -351,7 +351,7 @@ export class RapidPlanningApp {
 
   getSessionData(sessionId) {
     try {
-      const sessions = JSON.parse(localStorage.getItem('planningClubSessions') || '{}')
+      const sessions = JSON.parse(localStorage.getItem('rapidPlanningSessions') || '{}')
       return sessions[sessionId] || null
     } catch (e) {
       console.warn('Failed to load session data:', e)

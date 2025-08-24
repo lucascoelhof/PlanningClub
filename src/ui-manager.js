@@ -366,7 +366,7 @@ export class UIManager {
   clearStoredData() {
     try {
       Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('planningClub')) {
+        if (key.startsWith('rapidPlanning')) {
           localStorage.removeItem(key)
         }
       })
