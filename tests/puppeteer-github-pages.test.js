@@ -146,7 +146,7 @@ const runTests = async () => {
       expect(sessionInfo).toContain(sessionId);
       
       // Check host player appears
-      await page1.waitForSelector('.player-item');
+      await page1.waitForSelector('.player-card');
       const playerName = await getTextContent(page1, '.player-name');
       expect(playerName).toContain('Host Player');
     });
@@ -172,11 +172,11 @@ const runTests = async () => {
       
       // Wait for players to appear
       await page2.waitForFunction(
-        () => document.querySelectorAll('.player-item').length >= 2,
+        () => document.querySelectorAll('.player-card').length >= 2,
         { timeout: 20000 }
       );
       
-      const playerCount = await page2.$$eval('.player-item', items => items.length);
+      const playerCount = await page2.$$eval('.player-card', items => items.length);
       console.log(`  Guest sees ${playerCount} players`);
     });
     
@@ -187,7 +187,7 @@ const runTests = async () => {
       
       // Wait for host to see guest
       await page1.waitForFunction(
-        () => document.querySelectorAll('.player-item').length >= 2,
+        () => document.querySelectorAll('.player-card').length >= 2,
         { timeout: 15000 }
       );
       
@@ -231,8 +231,8 @@ const runTests = async () => {
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       // Check both show as voted
-      const hostVoted = await page1.$$('.player-item.voted');
-      const guestVoted = await page2.$$('.player-item.voted');
+      const hostVoted = await page1.$$('.player-card.voted');
+      const guestVoted = await page2.$$('.player-card.voted');
       
       console.log(`  Host sees ${hostVoted.length} players voted`);
       console.log(`  Guest sees ${guestVoted.length} players voted`);

@@ -103,7 +103,7 @@ describe('Planning Club Multiplayer Tests', () => {
     expect(sessionInfo).toContain(sessionId);
     
     // Check that host player is shown
-    await page1.waitForSelector('.player-item');
+    await page1.waitForSelector('.player-card');
     const playerName = await getTextContent(page1, '.player-name');
     expect(playerName).toContain('Host Player');
   }, TIMEOUT);
@@ -133,7 +133,7 @@ describe('Planning Club Multiplayer Tests', () => {
     
     // Wait for both players to appear
     await page2.waitForFunction(
-      () => document.querySelectorAll('.player-item').length >= 2,
+      () => document.querySelectorAll('.player-card').length >= 2,
       { timeout: 15000 }
     );
     
@@ -150,7 +150,7 @@ describe('Planning Club Multiplayer Tests', () => {
   test('Both players should see each other', async () => {
     // Wait for host to see the guest
     await page1.waitForFunction(
-      () => document.querySelectorAll('.player-item').length >= 2,
+      () => document.querySelectorAll('.player-card').length >= 2,
       { timeout: 15000 }
     );
     
@@ -201,10 +201,10 @@ describe('Planning Club Multiplayer Tests', () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Check that both players show as having voted
-    const hostVotedPlayers = await page1.$$eval('.player-item.voted', 
+    const hostVotedPlayers = await page1.$$eval('.player-card.voted', 
       elements => elements.length
     );
-    const guestVotedPlayers = await page2.$$eval('.player-item.voted', 
+    const guestVotedPlayers = await page2.$$eval('.player-card.voted', 
       elements => elements.length
     );
     
@@ -281,7 +281,7 @@ describe('Planning Club Multiplayer Tests', () => {
     
     // Wait for host to detect disconnection
     await page1.waitForFunction(
-      () => document.querySelectorAll('.player-item').length === 1,
+      () => document.querySelectorAll('.player-card').length === 1,
       { timeout: 15000 }
     );
     
@@ -446,14 +446,14 @@ const runTests = async () => {
       expect(sessionInfo).toContain(sessionId);
       
       await page2.waitForFunction(
-        () => document.querySelectorAll('.player-item').length >= 2,
+        () => document.querySelectorAll('.player-card').length >= 2,
         { timeout: 15000 }
       );
     });
     
     await runTest('Both players see each other', async () => {
       await page1.waitForFunction(
-        () => document.querySelectorAll('.player-item').length >= 2,
+        () => document.querySelectorAll('.player-card').length >= 2,
         { timeout: 15000 }
       );
       

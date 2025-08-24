@@ -105,7 +105,7 @@ const runTests = async () => {
   
   const waitForPlayerCount = async (page, count) => {
     await page.waitForFunction(
-      (expectedCount) => document.querySelectorAll('.player-item').length === expectedCount,
+      (expectedCount) => document.querySelectorAll('.player-card').length === expectedCount,
       { timeout: 45000 },
       count
     );
@@ -318,7 +318,7 @@ const runTests = async () => {
       
       // Check that all players show as voted
       await page1.waitForFunction(
-        () => document.querySelectorAll('.player-item.voted').length === 3,
+        () => document.querySelectorAll('.player-card.voted').length === 3,
         { timeout: 10000 }
       );
       
@@ -394,7 +394,7 @@ const runTests = async () => {
         // Wait for votes to be cleared (should have no .player-vote elements with actual votes)
         await page.waitForFunction(
           () => {
-            const playerItems = document.querySelectorAll('.player-item');
+            const playerItems = document.querySelectorAll('.player-card');
             // Check that no player shows a vote (neither ✓ nor actual vote)
             for (let item of playerItems) {
               const voteElement = item.querySelector('.player-vote');
