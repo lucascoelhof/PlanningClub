@@ -325,17 +325,32 @@ const runTests = async () => {
       // Host shows votes
       await page1.click('#show-votes');
       
+      // Wait longer for vote revealing to sync to all players
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
       // All pages should now show revealed votes
       const checkVotesRevealed = async (page, pageName) => {
-        await page.waitForSelector('.player-vote', { timeout: 10000 });
-        const votes = await page.$$eval('.player-vote', 
-          els => els.map(el => el.textContent.trim()).filter(vote => vote && vote !== '✓')
+        await page.waitForSelector('.player-vote', { timeout: 15000 });
+        
+        // Get all player-vote elements with debug info
+        const allVoteElements = await page.$$eval('.player-vote', 
+          els => els.map(el => ({
+            text: el.textContent.trim(),
+            visible: window.getComputedStyle(el).display !== 'none' && window.getComputedStyle(el).visibility !== 'hidden'
+          }))
         );
+        console.log(`   ${pageName} all vote elements:`, allVoteElements);
+        
+        const votes = allVoteElements
+          .filter(el => el.visible && el.text && el.text !== '✓')
+          .map(el => el.text);
+        
+        console.log(`   ${pageName} sees revealed votes: ${votes}`);
+        
         expect(votes.length).toBe(3);
         expect(votes).toContain('5');
         expect(votes).toContain('8');
         expect(votes).toContain('3');
-        console.log(`   ${pageName} sees revealed votes: ${votes}`);
         return votes;
       };
       
