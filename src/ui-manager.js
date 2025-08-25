@@ -488,83 +488,90 @@ export class UIManager {
         </div>
         
         <div class="game-content">
-          <div class="players-section">
-            <h3>Players</h3>
-            <div id="players-grid" class="players-grid">
-              <!-- Players will be rendered here -->
-            </div>
-          </div>
-        </div>
-        
-        <div class="voting-section">
-          <div class="voting-cards-section">
-            <h3>Cast Your Vote</h3>
-            <div id="voting-cards" class="voting-cards">
-              <!-- Vote cards will be rendered here -->
+          <!-- Left Column: Players Table -->
+          <div class="players-column">
+            <div class="players-section">
+              <h3>Players</h3>
+              <div id="players-table" class="players-table">
+                <!-- Players table will be rendered here -->
+              </div>
             </div>
           </div>
           
-          <div class="voting-stats-section">
-            <h3>Voting Statistics</h3>
-            <div class="stats-actions">
-              <button id="clear-votes" class="btn btn-secondary btn-small">
-                Clear Votes
-              </button>
-              <button id="show-votes" class="btn btn-secondary btn-small">
-                Show Votes
-              </button>
-            </div>
-            <div id="voting-stats" class="stats-content">
-              <div class="consensus-section">
-                <div id="consensus-indicator" class="consensus-indicator">
-                  <!-- Consensus status will be rendered here -->
-                </div>
+          <!-- Center Column: Statistics -->
+          <div class="stats-column">
+            <div class="voting-stats-section">
+              <h3>Voting Statistics</h3>
+              <div class="stats-actions">
+                <button id="clear-votes" class="btn btn-secondary btn-small">
+                  Clear Votes
+                </button>
+                <button id="show-votes" class="btn btn-secondary btn-small">
+                  Show Votes
+                </button>
               </div>
-              <div class="average-section">
-                <strong>Average:</strong>
-                <div class="average-value" id="average-value">-</div>
-              </div>
-              <div class="votes-breakdown">
-                <div class="breakdown-header">
-                  <span><strong>Points</strong></span>
-                  <span><strong>Votes</strong></span>
+              <div id="voting-stats" class="stats-content">
+                <div class="consensus-section">
+                  <div id="consensus-indicator" class="consensus-indicator">
+                    <!-- Consensus status will be rendered here -->
+                  </div>
                 </div>
-                <div id="votes-breakdown-content">
-                  <!-- Vote breakdown will be rendered here -->
+                <div class="average-section">
+                  <strong>Average:</strong>
+                  <div class="average-value" id="average-value">-</div>
+                </div>
+                <div class="votes-breakdown">
+                  <div class="breakdown-header">
+                    <span><strong>Points</strong></span>
+                    <span><strong>Votes</strong></span>
+                  </div>
+                  <div id="votes-breakdown-content">
+                    <!-- Vote breakdown will be rendered here -->
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
-          <div class="reactions-section">
-            <h3>Reactions</h3>
-            <div id="reaction-buttons" class="reaction-buttons">
-              <!-- Reaction buttons will be rendered here -->
+          <!-- Right Column: Controls -->
+          <div class="controls-column">
+            <div class="voting-cards-section">
+              <h3>Cast Your Vote</h3>
+              <div id="voting-cards" class="voting-cards">
+                <!-- Vote cards will be rendered here -->
+              </div>
             </div>
-          </div>
-          
-          <div class="keyboard-shortcuts-section">
-            <h3>Keyboard Shortcuts</h3>
-            <div class="shortcuts-grid">
-              <div class="shortcut-item">
-                <kbd>0-9, ½, ?</kbd>
-                <span>Vote (0.5s delay)</span>
+            
+            <div class="reactions-section">
+              <h3>Reactions</h3>
+              <div id="reaction-buttons" class="reaction-buttons">
+                <!-- Reaction buttons will be rendered here -->
               </div>
-              <div class="shortcut-item">
-                <kbd>+ / =</kbd>
-                <span>Next vote option</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>- / _</kbd>
-                <span>Previous vote option</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>Enter</kbd>
-                <span>Show votes</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>Esc</kbd>
-                <span>Clear votes</span>
+            </div>
+            
+            <div class="keyboard-shortcuts-section">
+              <h3>Keyboard Shortcuts</h3>
+              <div class="shortcuts-grid">
+                <div class="shortcut-item">
+                  <kbd>0-9, ½, ?</kbd>
+                  <span>Vote (0.5s delay)</span>
+                </div>
+                <div class="shortcut-item">
+                  <kbd>+ / =</kbd>
+                  <span>Next vote option</span>
+                </div>
+                <div class="shortcut-item">
+                  <kbd>- / _</kbd>
+                  <span>Previous vote option</span>
+                </div>
+                <div class="shortcut-item">
+                  <kbd>Enter</kbd>
+                  <span>Show votes</span>
+                </div>
+                <div class="shortcut-item">
+                  <kbd>Esc</kbd>
+                  <span>Clear votes</span>
+                </div>
               </div>
             </div>
           </div>
@@ -862,26 +869,38 @@ export class UIManager {
   renderPlayers() {
     if (this.currentPage !== 'game') return
 
-    const container = document.getElementById('players-grid')
+    const container = document.getElementById('players-table')
     if (!container) return
     
-    container.innerHTML = this.players.map(player => `
-      <div class="player-card ${player.vote ? 'voted' : ''} ${this.votesRevealed && player.vote ? 'revealed' : ''}">
-        <div class="player-avatar">
-          ${player.avatar ? 
-            `<img src="${player.avatar}" alt="${player.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-             <span style="display: none;">${this.getInitials(player.name)}</span>` : 
-            `<span>${this.getInitials(player.name)}</span>`
-          }
-          ${player.reaction ? `<div class="player-reaction">${player.reaction}</div>` : ''}
-        </div>
-        <div class="player-name">${player.name}</div>
-        ${this.votesRevealed && player.vote ? 
-          `<div class="player-vote">${player.vote}</div>` : 
-          (player.vote ? '<div class="player-vote">✓</div>' : '')
-        }
-      </div>
-    `).join('')
+    const hasVotes = this.players.some(player => player.vote)
+    
+    container.innerHTML = `
+      <table class="players-data-table">
+        <tbody>
+          ${this.players.map(player => `
+            <tr class="player-row ${player.vote ? 'voted' : ''} ${this.votesRevealed && player.vote ? 'revealed' : ''}">
+              <td class="player-info">
+                <div class="player-avatar">
+                  ${player.avatar ? 
+                    `<img src="${player.avatar}" alt="${player.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                     <span style="display: none;">${this.getInitials(player.name)}</span>` : 
+                    `<span>${this.getInitials(player.name)}</span>`
+                  }
+                  ${player.reaction ? `<div class="player-reaction">${player.reaction}</div>` : ''}
+                </div>
+                <div class="player-name">${player.name}</div>
+              </td>
+              <td class="player-vote-cell">
+                ${this.votesRevealed && player.vote ? 
+                  `<span class="player-vote-value">${player.vote}</span>` : 
+                  (player.vote ? '<span class="player-voted-indicator">✓</span>' : '<span class="player-no-vote">-</span>')
+                }
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `
   }
 
   revealVotes() {
