@@ -5,7 +5,6 @@ describe('Keyboard Navigation', () => {
   let uiManager;
   let mockGameManager;
   let mockConnectionManager;
-  let mockThemeManager;
 
   beforeEach(() => {
     // Setup DOM with required elements
@@ -29,21 +28,8 @@ describe('Keyboard Navigation', () => {
         icon: '🟢'
       })
     };
-    
-    mockThemeManager = {
-      on: jest.fn(),
-      getEffectiveThemeInfo: jest.fn().mockReturnValue({
-        info: { icon: '🌙', name: 'Dark' },
-        effective: 'dark',
-        isAuto: false
-      }),
-      themes: {
-        dark: { icon: '🌙', name: 'Dark' }
-      },
-      toggleTheme: jest.fn().mockReturnValue('dark')
-    };
 
-    uiManager = new UIManager(mockGameManager, mockConnectionManager, mockThemeManager);
+    uiManager = new UIManager(mockGameManager, mockConnectionManager);
     
     // Mock the renderVoteCards method to avoid DOM errors
     jest.spyOn(uiManager, 'renderVoteCards').mockImplementation(() => {});

@@ -4,7 +4,6 @@ import { GameManager } from './game-manager.js'
 import { UIManager } from './ui-manager.js'
 import { ConnectionManager } from './services/connection-manager.js'
 import { ErrorHandler } from './services/error-handler.js'
-import { ThemeManager } from './services/theme-manager.js'
 import { analytics } from './services/analytics.js'
 
 export class RapidPlanningApp {
@@ -13,8 +12,7 @@ export class RapidPlanningApp {
     this.peerManager = new PeerManager()
     this.gameManager = new GameManager()
     this.connectionManager = new ConnectionManager()
-    this.themeManager = new ThemeManager()
-    this.uiManager = new UIManager(this.gameManager, this.connectionManager, this.themeManager)
+    this.uiManager = new UIManager(this.gameManager, this.connectionManager)
     this.errorHandler = new ErrorHandler(this.uiManager)
     this.pendingGameState = null
     

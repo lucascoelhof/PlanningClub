@@ -2,7 +2,7 @@
 const CryptoJS = window.CryptoJS;
 
 export class UIManager {
-  constructor(gameManager = null, connectionManager = null, themeManager = null) {
+  constructor(gameManager = null, connectionManager = null) {
     this.events = {}
     this.currentPage = null
     this.players = []
@@ -11,22 +11,11 @@ export class UIManager {
     this.votesRevealed = false
     this.gameManager = gameManager
     this.connectionManager = connectionManager
-    this.themeManager = themeManager
     
     this.reactions = ['👍', '👎', '😄', '😕', '😲', '🤔', '🔥', '❤️']
     
     this.setupConnectionStatusUI()
-    this.setupThemeUI()
     this.setupKeyboardNavigation()
-  }
-
-  setupThemeUI() {
-    if (!this.themeManager) return
-    
-    // Listen for theme changes to update UI
-    this.themeManager.on('themeChanged', (themeInfo) => {
-      this.updateThemeToggle(themeInfo)
-    })
   }
 
   setupKeyboardNavigation() {
@@ -211,25 +200,6 @@ export class UIManager {
     `
     statusBar.appendChild(statusIndicator)
     
-    // Theme toggle button
-    if (this.themeManager) {
-      const themeToggle = document.createElement('button')
-      themeToggle.id = 'theme-toggle'
-      themeToggle.className = 'theme-toggle-btn'
-      themeToggle.title = 'Switch theme'
-      
-      const themeInfo = this.themeManager.getEffectiveThemeInfo()
-      themeToggle.innerHTML = `
-        <span class="theme-icon">${themeInfo.info.icon}</span>
-      `
-      
-      themeToggle.onclick = () => {
-        this.themeManager.toggleTheme()
-      }
-      
-      statusBar.appendChild(themeToggle)
-    }
-    
     document.body.appendChild(statusBar)
     
     // Trigger initial connection status update
@@ -257,21 +227,6 @@ export class UIManager {
       indicator.querySelector('.connection-icon').textContent = statusMessage.icon
       indicator.querySelector('.connection-text').textContent = statusMessage.message
     }
-  }
-
-  updateThemeToggle(themeInfo) {
-    const themeToggle = document.getElementById('theme-toggle')
-    if (!themeToggle) return
-    
-    const themeIcon = themeToggle.querySelector('.theme-icon')
-    if (themeIcon) {
-      themeIcon.textContent = themeInfo.effective ? 
-        this.themeManager.themes[themeInfo.effective].icon : 
-        themeInfo.info.icon
-    }
-    
-    // Update title
-    themeToggle.title = `Current: ${themeInfo.info.name} theme${themeInfo.isAuto ? ` (${themeInfo.effective})` : ''}`
   }
 
 
